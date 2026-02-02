@@ -8,15 +8,23 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.5rem",
+        lg: "2rem",
+      },
       screens: {
-        "2xl": "1400px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1440px",
       },
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -78,19 +86,42 @@ export default {
           to: { height: "0" },
         },
         shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
         },
         pulse: {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideUp: {
+          "0%": { opacity: "0", transform: "translateY(30px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        scaleIn: {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        shimmer: "shimmer 2s infinite linear",
+        shimmer: "shimmer 2s infinite",
         pulse: "pulse 2s infinite",
+        fadeIn: "fadeIn 0.6s ease-out",
+        slideUp: "slideUp 0.6s ease-out",
+        scaleIn: "scaleIn 0.3s ease-out",
+      },
+      backdropBlur: {
+        xs: "2px",
+      },
+      boxShadow: {
+        'premium': '0 20px 60px -15px rgba(59, 130, 246, 0.4)',
+        'glow': '0 0 60px rgba(59, 130, 246, 0.3)',
+        'card': '0 10px 40px -10px rgba(59, 130, 246, 0.25)',
       },
     },
   },

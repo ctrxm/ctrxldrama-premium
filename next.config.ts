@@ -1,12 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  logging: {
-    fetches: {
-      fullUrl: false,
-    },
-  },
+  // Cloudflare Pages compatibility
+  output: "export",
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -42,7 +40,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+  // Disable server-side features for static export
+  trailingSlash: true,
 };
 
 export default nextConfig;
-
