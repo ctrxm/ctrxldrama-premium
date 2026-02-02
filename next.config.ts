@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Cloudflare Pages compatibility
-  output: "export",
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -45,8 +43,6 @@ const nextConfig: NextConfig = {
       fullUrl: false,
     },
   },
-  // Disable server-side features for static export
-  trailingSlash: true,
 };
 
 export default nextConfig;
