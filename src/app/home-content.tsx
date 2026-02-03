@@ -10,7 +10,7 @@ import { FlickReelsHome } from "@/components/FlickReelsHome";
 import { FreeReelsHome } from "@/components/FreeReelsHome";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { ContinueWatching } from "@/components/ContinueWatching";
-
+import { InfiniteDramaSection } from "@/components/InfiniteDramaSection";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { BackToTop } from "@/components/BackToTop";
 
@@ -99,6 +99,11 @@ export default function HomeContent() {
               error={!!errorDubindo}
               onRetry={() => refetchDubindo()}
             />
+          </ScrollReveal>
+
+          {/* Infinite Scroll Section */}
+          <ScrollReveal delay={300}>
+            <InfiniteDramaSection title="Lainnya" />
           </ScrollReveal>
         </div>
       )}
