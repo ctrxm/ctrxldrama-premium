@@ -4,6 +4,7 @@ import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
+import { AdsDisplay } from "@/components/AdsDisplay";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Suspense } from "react";
@@ -35,6 +36,8 @@ export default function RootLayout({
           </div>
           <Footer />
           <BottomNav />
+          <AdsDisplay position="popup" />
+          <AdsDisplay position="bottom" />
           <Toaster />
           <Sonner />
         </Providers>

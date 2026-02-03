@@ -2,6 +2,7 @@
 
 import { PlatformSelector } from "@/components/PlatformSelector";
 import { DramaSection } from "@/components/DramaSection";
+import { AdsDisplay } from "@/components/AdsDisplay";
 import { ReelShortSection } from "@/components/ReelShortSection";
 import { NetShortHome } from "@/components/NetShortHome";
 import { MeloloHome } from "@/components/MeloloHome";
@@ -28,6 +29,11 @@ export default function HomeContent() {
         </div>
       </div>
 
+      {/* Banner Ad */}
+      <div className="container mx-auto px-4 pt-6">
+        <AdsDisplay position="banner" />
+      </div>
+
       {/* DramaBox Content - Multiple Sections */}
       {isDramaBox && (
         <div className="container mx-auto px-4 py-6 space-y-8">
@@ -45,6 +51,7 @@ export default function HomeContent() {
             error={!!errorLatest}
             onRetry={() => refetchLatest()}
           />
+          <AdsDisplay position="inline" />
           <DramaSection
             title="Terpopuler"
             dramas={trendingDramas}
