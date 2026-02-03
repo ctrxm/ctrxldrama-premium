@@ -56,15 +56,15 @@ export async function fetchJson<T>(url: string, options?: RequestInit): Promise<
     if (json.data && typeof json.data === "string") {
       try {
         const decrypted = decryptData(json.data);
-        return decrypted;
+        return decrypted as T;
       } catch (error) {
         console.error("Failed to decrypt data:", error);
         // Return original if decryption fails
-        return json;
+        return json as T;
       }
     }
     
-    return json;
+    return json as T;
   } catch (error) {
     // Re-throw ApiError as is
     if (error instanceof ApiError) {
