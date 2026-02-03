@@ -64,19 +64,29 @@ export default function BrowsePage() {
           </div>
         ) : dramas && dramas.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {dramas.map((drama: any) => (
+            {dramas.map((drama: any) => {
+              const dramaId = drama.bookId || drama.book_id || drama.short_play_id || drama.id;
+              const dramaTitle = drama.bookName || drama.name || drama.book_name || drama.title;
+              const dramaCover = drama.cover || drama.cover_url || drama.thumb_url;
+              const dramaRating = drama.rating || drama.score;
+              const dramaEpisodes = drama.episodeCount || drama.episode_count;
+
+              if (!dramaId || !dramaTitle) return null;
+
+              return (
               <Link
-                key={drama.id}
-                href={`/drama/dramabox/${drama.id}`}
+                key={dramaId}
+                href={`/detail/dramabox/${dramaId}`}
                 className="group"
               >
                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-accent mb-3">
-                  {drama.cover_url ? (
+                  {dramaCover ? (
                     <Image
-                      src={drama.cover_url}
-                      alt={drama.title}
+                      src={dramaCover}
+                      alt={dramaTitle}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -84,23 +94,24 @@ export default function BrowsePage() {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  {drama.score && (
+                  {dramaRating && (
                     <div className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
                       <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                      <span className="text-xs text-white font-medium">{drama.score}</span>
+                      <span className="text-xs text-white font-medium">{dramaRating}</span>
                     </div>
                   )}
                 </div>
                 <h3 className="font-semibold text-sm line-clamp-2 mb-1">
-                  {drama.title}
+                  {dramaTitle}
                 </h3>
-                {drama.episode_count && (
+                {dramaEpisodes && (
                   <p className="text-xs text-muted-foreground">
-                    {drama.episode_count} episodes
+                    {dramaEpisodes} episodes
                   </p>
                 )}
               </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20">

@@ -10,10 +10,10 @@ import { FlickReelsHome } from "@/components/FlickReelsHome";
 import { FreeReelsHome } from "@/components/FreeReelsHome";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { ContinueWatching } from "@/components/ContinueWatching";
-import { TrendingSection } from "@/components/TrendingSection";
+
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { BackToTop } from "@/components/BackToTop";
-import { DarkModeToggle } from "@/components/DarkModeToggle";
+
 import { useForYouDramas, useLatestDramas, useTrendingDramas, useDubindoDramas } from "@/hooks/useDramas";
 import { usePlatform } from "@/hooks/usePlatform";
 
@@ -56,10 +56,12 @@ export default function HomeContent() {
 
           {/* Trending Section */}
           <ScrollReveal delay={200}>
-            <TrendingSection
-              dramas={trendingDramas || []}
+            <DramaSection
+              title="🔥 Trending Now"
+              dramas={trendingDramas}
               isLoading={loadingTrending}
-              platform="dramabox"
+              error={!!errorTrending}
+              onRetry={() => refetchTrending()}
             />
           </ScrollReveal>
 
@@ -153,7 +155,6 @@ export default function HomeContent() {
 
       {/* Floating Action Buttons */}
       <BackToTop />
-      <DarkModeToggle />
     </main>
   );
 }
