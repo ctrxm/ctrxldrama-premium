@@ -71,7 +71,8 @@ export default function BrowsePage() {
               const dramaRating = drama.rating || drama.score;
               const dramaEpisodes = drama.episodeCount || drama.episode_count;
 
-              if (!dramaId || !dramaTitle) return null;
+              // Skip if no valid data or invalid image URL
+              if (!dramaId || !dramaTitle || !dramaCover || !dramaCover.startsWith('http')) return null;
 
               return (
               <Link

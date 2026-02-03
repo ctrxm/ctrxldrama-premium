@@ -16,33 +16,52 @@ export function HeroCarousel({ dramas, isLoading }: HeroCarouselProps) {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   useEffect(() => {
-    if (!isAutoPlaying || dramas.length === 0) return;
+    const validDramas = dramas.filter(drama => {
+      const cover = drama.cover || drama.cover_url || drama.thumb_url;
+      return cover && cover.startsWith('http');
+    });
+
+    if (!isAutoPlaying || validDramas.length === 0) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % dramas.length);
+      setCurrentIndex((prev) => (prev + 1) % validDramas.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, dramas.length]);
+  }, [isAutoPlaying, dramas]);
 
   if (isLoading) {
     return <HeroSkeleton />;
   }
 
-  if (!dramas || dramas.length === 0) {
+  // Filter dramas with valid cover images
+  const validDramas = dramas.filter(drama => {
+    const cover = drama.cover || drama.cover_url || drama.thumb_url;
+    return cover && cover.startsWith('http');
+  });
+
+  if (!validDramas || validDramas.length === 0) {
     return null;
   }
 
-  const currentDrama = dramas[currentIndex];
+  const currentDrama = validDramas[currentIndex % validDramas.length];
 
   const handlePrev = () => {
     setIsAutoPlaying(false);
-    setCurrentIndex((prev) => (prev - 1 + dramas.length) % dramas.length);
+    const validDramas = dramas.filter(drama => {
+      const cover = drama.cover || drama.cover_url || drama.thumb_url;
+      return cover && cover.startsWith('http');
+    });
+    setCurrentIndex((prev) => (prev - 1 + validDramas.length) % validDramas.length);
   };
 
   const handleNext = () => {
     setIsAutoPlaying(false);
-    setCurrentIndex((prev) => (prev + 1) % dramas.length);
+    const validDramas = dramas.filter(drama => {
+      const cover = drama.cover || drama.cover_url || drama.thumb_url;
+      return cover && cover.startsWith('http');
+    });
+    setCurrentIndex((prev) => (prev + 1) % validDramas.length);
   };
 
   return (
@@ -135,7 +154,7 @@ export function HeroCarousel({ dramas, isLoading }: HeroCarouselProps) {
 
       {/* Dots Indicator */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-        {dramas.map((_, index) => (
+        {validDramas.map((_, index) => (
           <button
             key={index}
             onClick={() => {
