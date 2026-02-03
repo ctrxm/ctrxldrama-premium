@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, AlertCircle, X } from "lucide-react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import TikTokPlayer from "@/components/TikTokPlayer";
-import { decryptData } from "@/lib/crypto";
+import { fetchJson } from "@/lib/fetcher";
 
 interface VideoItem {
   url: string;
@@ -35,27 +35,11 @@ interface Episode {
 }
 
 async function fetchEpisode(bookId: string, episodeNumber: number): Promise<EpisodeData> {
-  const response = await fetch(`/api/reelshort/watch?bookId=${bookId}&episodeNumber=${episodeNumber}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch episode");
-  }
-  const json = await response.json();
-  if (json.data && typeof json.data === "string") {
-    return decryptData(json.data);
-  }
-  return json;
+  return fetchJson<EpisodeData>(`/api/reelshort/watch?bookId=${bookId}&episodeNumber=${episodeNumber}`);
 }
 
 async function fetchDetail(bookId: string): Promise<DetailData> {
-  const response = await fetch(`/api/reelshort/detail?bookId=${bookId}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch detail");
-  }
-  const json = await response.json();
-  if (json.data && typeof json.data === "string") {
-    return decryptData(json.data);
-  }
-  return json;
+  return fetchJson<DetailData>(`/api/reelshort/detail?bookId=${bookId}`);
 }
 
 export default function ReelShortWatchPage() {

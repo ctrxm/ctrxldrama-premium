@@ -16,20 +16,10 @@ interface ReelShortDetailData {
   totalEpisodes: number;
 }
 
-import { decryptData } from "@/lib/crypto";
-
-// ... existing code
+import { fetchJson } from "@/lib/fetcher";
 
 async function fetchReelShortDetail(bookId: string): Promise<ReelShortDetailData> {
-  const response = await fetch(`/api/reelshort/detail?bookId=${bookId}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch detail");
-  }
-  const json = await response.json();
-  if (json.data && typeof json.data === "string") {
-    return decryptData(json.data);
-  }
-  return json;
+  return fetchJson<ReelShortDetailData>(`/api/reelshort/detail?bookId=${bookId}`);
 }
 
 export default function ReelShortDetailPage() {
