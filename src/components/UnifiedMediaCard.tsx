@@ -31,31 +31,30 @@ export function UnifiedMediaCard({
   index = 0,
 }: UnifiedMediaCardProps) {
   
-  const BADGE_BASE = "px-2 py-1 md:px-2.5 md:py-1 rounded-lg font-bold text-white shadow-lg leading-none tracking-wide flex items-center gap-1 font-sans text-[9px] md:text-[10px] uppercase";
+  const BADGE_BASE = "px-2.5 py-1 rounded-md font-bold text-white shadow-sm leading-none tracking-wide flex items-center gap-1 font-sans text-[10px] uppercase";
 
   return (
     <Link
       href={link}
-      className="group relative block slide-up"
-      style={{ animationDelay: `${index * 50}ms` }}
+      className="group relative block"
     >
       {/* Visual Container */}
-      <div className="card-premium aspect-[2/3] relative overflow-hidden">
+      <div className="card-corporate aspect-[2/3] relative overflow-hidden">
         <img
           src={cover.includes(".heic") 
             ? `https://wsrv.nl/?url=${encodeURIComponent(cover)}&output=jpg` 
             : cover}
           alt={title}
-          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+          className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
           loading="lazy"
           referrerPolicy="no-referrer"
         />
 
-        {/* Premium Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+        {/* Flat Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
         {/* Badges Container */}
-        <div className="absolute top-2 left-2 right-2 md:top-3 md:left-3 md:right-3 flex justify-between items-start pointer-events-none z-10 gap-2">
+        <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none z-10 gap-2">
           
           {/* Top Left Badge */}
           <div className="flex-1 min-w-0 flex justify-start"> 
@@ -66,7 +65,7 @@ export function UnifiedMediaCard({
                   ${topLeftBadge.isPremium ? 'badge-premium' : ''}
                 `}
                 style={!topLeftBadge.isPremium ? { 
-                  backgroundColor: topLeftBadge.color || "#E52E2E",
+                  backgroundColor: topLeftBadge.color || "#DC2626",
                   color: topLeftBadge.textColor || "#FFFFFF"
                 } : {}}
               >
@@ -80,16 +79,12 @@ export function UnifiedMediaCard({
           <div className="shrink-0 flex justify-end">
             {topRightBadge && (
               <div 
-                className={`
-                  ${BADGE_BASE}
-                  ${topRightBadge.isTransparent ? 'glass-strong' : ''}
-                `}
+                className={`${BADGE_BASE}`}
                 style={{ 
                   backgroundColor: topRightBadge.isTransparent 
-                    ? "rgba(10, 22, 40, 0.7)" 
-                    : (topRightBadge.color || "rgba(10, 22, 40, 0.7)"),
-                  color: topRightBadge.textColor || "#FFFFFF",
-                  backdropFilter: topRightBadge.isTransparent ? "blur(12px)" : "none"
+                    ? "rgba(0, 0, 0, 0.6)" 
+                    : (topRightBadge.color || "rgba(0, 0, 0, 0.6)"),
+                  color: topRightBadge.textColor || "#FFFFFF"
                 }}
               >
                 {topRightBadge.text}
@@ -100,31 +95,23 @@ export function UnifiedMediaCard({
 
         {/* Episode Count Badge */}
         {episodes > 0 && (
-          <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 episode-badge pointer-events-none">
-            <Play className="w-3 h-3 md:w-3.5 md:h-3.5 fill-primary text-primary" />
+          <div className="absolute bottom-2 left-2 episode-badge pointer-events-none">
+            <Play className="w-3.5 h-3.5 fill-primary text-primary" />
             <span className="font-semibold">{episodes} Episodes</span>
           </div>
         )}
 
-        {/* Center Play Button with Glow */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary rounded-full blur-xl opacity-60" />
-            <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
-              <Play className="w-6 h-6 md:w-7 md:h-7 text-white fill-white ml-1" />
-            </div>
+        {/* Center Play Button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-lg">
+            <Play className="w-6 h-6 text-white fill-white ml-0.5" />
           </div>
-        </div>
-
-        {/* Shimmer Effect on Hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <div className="shimmer" />
         </div>
       </div>
 
-      {/* Title with Premium Styling */}
-      <div className="pt-3 md:pt-4 pb-1">
-        <h3 className="font-bold text-sm md:text-base leading-snug line-clamp-2 text-foreground group-hover:gradient-text transition-all duration-300">
+      {/* Title */}
+      <div className="pt-3 pb-1">
+        <h3 className="font-bold text-sm leading-snug line-clamp-2 text-foreground group-hover:text-primary transition-colors">
           {title}
         </h3>
       </div>
