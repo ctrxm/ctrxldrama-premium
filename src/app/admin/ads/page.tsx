@@ -17,7 +17,7 @@ interface Ad {
 }
 
 export default function AdsManagement() {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,10 +32,17 @@ export default function AdsManagement() {
   });
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      router.push('/');
+    // Only redirect if auth is fully loaded and user is confirmed not admin
+    if (!authLoading) {
+      if (!user) {
+        // No user logged in, redirect to home
+        router.push('/');
+      } else if (!isAdmin) {
+        // User logged in but not admin, redirect to home
+        router.push('/');
+      }
     }
-  }, [authLoading, isAdmin, router]);
+  }, [authLoading, user, isAdmin, router]);
 
   useEffect(() => {
     if (isAdmin) {

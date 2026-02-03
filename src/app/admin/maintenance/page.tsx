@@ -13,17 +13,24 @@ interface Maintenance {
 }
 
 export default function MaintenancePage() {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const [maintenance, setMaintenance] = useState<Maintenance | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      router.push('/');
+    // Only redirect if auth is fully loaded and user is confirmed not admin
+    if (!authLoading) {
+      if (!user) {
+        // No user logged in, redirect to home
+        router.push('/');
+      } else if (!isAdmin) {
+        // User logged in but not admin, redirect to home
+        router.push('/');
+      }
     }
-  }, [authLoading, isAdmin, router]);
+  }, [authLoading, user, isAdmin, router]);
 
   useEffect(() => {
     if (isAdmin) {
