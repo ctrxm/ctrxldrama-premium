@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[AuthContext] Initial session check:', session?.user?.email);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('[AuthContext] Auth state changed:', _event, session?.user?.email);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const fetchUserRole = async (userId: string) => {
+    console.log('[AuthContext] Fetching role for user:', userId);
     try {
       const { data, error } = await supabase
         .from('users')
@@ -57,13 +60,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching user role:', error);
+        console.error('[AuthContext] Error fetching user role:', error);
+        console.error('[AuthContext] Error details:', JSON.stringify(error, null, 2));
+        
+        // If error is related to RLS or not found, try to insert the user
+        if (error.code === 'PGRST116' || error.message.includes('no rows')) {
+          console.log('[AuthContext] User not found in users table, creating...');
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert([{ id: userId, role: 'user' }]);
+          
+          if (insertError) {
+            console.error('[AuthContext] Error creating user:', insertError);
+          } else {
+            console.log('[AuthContext] User created successfully');
+          }
+        }
+        
         setUserRole('user');
       } else {
+        console.log('[AuthContext] Role fetched successfully:', data?.role);
         setUserRole(data?.role || 'user');
       }
     } catch (error) {
-      console.error('Error fetching user role:', error);
+      console.error('[AuthContext] Exception fetching user role:', error);
       setUserRole('user');
     } finally {
       setLoading(false);
@@ -122,6 +142,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     isAdmin: userRole === 'admin',
   };
+
+  console.log('[AuthContext] Current state:', {
+    user: user?.email,
+    userRole,
+    loading,
+    isAdmin: userRole === 'admin',
+  });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

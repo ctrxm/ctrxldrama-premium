@@ -15,23 +15,32 @@ interface Statistics {
 }
 
 export default function AdminDashboard() {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: authLoading, userRole } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('[AdminDashboard] Auth state:', { 
+      authLoading, 
+      user: user?.email, 
+      userRole,
+      isAdmin 
+    });
+
     // Only redirect if auth is fully loaded and user is confirmed not admin
     if (!authLoading) {
       if (!user) {
-        // No user logged in, redirect to home
+        console.log('[AdminDashboard] No user, redirecting to home');
         router.push('/');
       } else if (!isAdmin) {
-        // User logged in but not admin, redirect to home
+        console.log('[AdminDashboard] User is not admin, redirecting to home');
         router.push('/');
+      } else {
+        console.log('[AdminDashboard] User is admin, staying on page');
       }
     }
-  }, [authLoading, user, isAdmin, router]);
+  }, [authLoading, user, isAdmin, userRole, router]);
 
   useEffect(() => {
     if (isAdmin) {
