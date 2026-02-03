@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import { Film, TrendingUp, Clock, Star, Loader2, Play } from 'lucide-react';
-import { useDramaBoxForYou, useDramaBoxLatest, useDramaBoxTrending } from '@/hooks/useDramas';
+import { useForYouDramas, useLatestDramas, useTrendingDramas } from '@/hooks/useDramas';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function BrowsePage() {
   const [activeTab, setActiveTab] = useState<'foryou' | 'trending' | 'latest'>('foryou');
   
-  const { data: forYouData, isLoading: forYouLoading } = useDramaBoxForYou();
-  const { data: trendingData, isLoading: trendingLoading } = useDramaBoxTrending();
-  const { data: latestData, isLoading: latestLoading } = useDramaBoxLatest();
+  const { data: forYouData, isLoading: forYouLoading } = useForYouDramas();
+  const { data: trendingData, isLoading: trendingLoading } = useTrendingDramas();
+  const { data: latestData, isLoading: latestLoading } = useLatestDramas();
 
   const isLoading = activeTab === 'foryou' ? forYouLoading : activeTab === 'trending' ? trendingLoading : latestLoading;
   const dramas = activeTab === 'foryou' ? forYouData : activeTab === 'trending' ? trendingData : latestData;
