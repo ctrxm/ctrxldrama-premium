@@ -8,6 +8,12 @@ import { NetShortHome } from "@/components/NetShortHome";
 import { MeloloHome } from "@/components/MeloloHome";
 import { FlickReelsHome } from "@/components/FlickReelsHome";
 import { FreeReelsHome } from "@/components/FreeReelsHome";
+import { HeroCarousel } from "@/components/HeroCarousel";
+import { ContinueWatching } from "@/components/ContinueWatching";
+import { TrendingSection } from "@/components/TrendingSection";
+import { ScrollReveal } from "@/components/ScrollReveal";
+import { BackToTop } from "@/components/BackToTop";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { useForYouDramas, useLatestDramas, useTrendingDramas, useDubindoDramas } from "@/hooks/useDramas";
 import { usePlatform } from "@/hooks/usePlatform";
 
@@ -29,81 +35,125 @@ export default function HomeContent() {
         </div>
       </div>
 
-      {/* Banner Ad */}
-      <div className="container mx-auto px-4 pt-6">
-        <AdsDisplay position="banner" />
-      </div>
-
       {/* DramaBox Content - Multiple Sections */}
       {isDramaBox && (
-        <div className="container mx-auto px-4 py-6 space-y-8">
-          <DramaSection
-            title="Populer"
-            dramas={popularDramas}
-            isLoading={loadingPopular}
-            error={!!errorPopular}
-            onRetry={() => refetchPopular()}
-          />
-          <DramaSection
-            title="Terbaru"
-            dramas={latestDramas}
-            isLoading={loadingLatest}
-            error={!!errorLatest}
-            onRetry={() => refetchLatest()}
-          />
+        <div className="container mx-auto px-4 py-6 space-y-12">
+          {/* Hero Carousel */}
+          <ScrollReveal>
+            <HeroCarousel
+              dramas={trendingDramas?.slice(0, 5) || []}
+              isLoading={loadingTrending}
+            />
+          </ScrollReveal>
+
+          {/* Banner Ad */}
+          <AdsDisplay position="banner" />
+
+          {/* Continue Watching */}
+          <ScrollReveal delay={100}>
+            <ContinueWatching />
+          </ScrollReveal>
+
+          {/* Trending Section */}
+          <ScrollReveal delay={200}>
+            <TrendingSection
+              dramas={trendingDramas || []}
+              isLoading={loadingTrending}
+              platform="dramabox"
+            />
+          </ScrollReveal>
+
+          {/* Popular Section */}
+          <ScrollReveal delay={300}>
+            <DramaSection
+              title="Populer"
+              dramas={popularDramas}
+              isLoading={loadingPopular}
+              error={!!errorPopular}
+              onRetry={() => refetchPopular()}
+            />
+          </ScrollReveal>
+
+          {/* Inline Ad */}
           <AdsDisplay position="inline" />
-          <DramaSection
-            title="Terpopuler"
-            dramas={trendingDramas}
-            isLoading={loadingTrending}
-            error={!!errorTrending}
-            onRetry={() => refetchTrending()}
-          />
-          <DramaSection
-            title="Dubindo"
-            dramas={dubindoDramas}
-            isLoading={loadingDubindo}
-            error={!!errorDubindo}
-            onRetry={() => refetchDubindo()}
-          />
+
+          {/* Latest Section */}
+          <ScrollReveal delay={100}>
+            <DramaSection
+              title="Terbaru"
+              dramas={latestDramas}
+              isLoading={loadingLatest}
+              error={!!errorLatest}
+              onRetry={() => refetchLatest()}
+            />
+          </ScrollReveal>
+
+          {/* Dubindo Section */}
+          <ScrollReveal delay={200}>
+            <DramaSection
+              title="Dubindo"
+              dramas={dubindoDramas}
+              isLoading={loadingDubindo}
+              error={!!errorDubindo}
+              onRetry={() => refetchDubindo()}
+            />
+          </ScrollReveal>
         </div>
       )}
 
       {/* ReelShort Content - Multiple Sections */}
       {isReelShort && (
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <ReelShortSection />
+          <AdsDisplay position="banner" />
+          <ScrollReveal>
+            <ReelShortSection />
+          </ScrollReveal>
         </div>
       )}
 
       {/* NetShort Content */}
       {isNetShort && (
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <NetShortHome />
+          <AdsDisplay position="banner" />
+          <ScrollReveal>
+            <NetShortHome />
+          </ScrollReveal>
         </div>
       )}
 
       {/* Melolo Content */}
       {isMelolo && (
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <MeloloHome />
+          <AdsDisplay position="banner" />
+          <ScrollReveal>
+            <MeloloHome />
+          </ScrollReveal>
         </div>
       )}
 
       {/* FlickReels Content */}
       {isFlickReels && (
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <FlickReelsHome />
+          <AdsDisplay position="banner" />
+          <ScrollReveal>
+            <FlickReelsHome />
+          </ScrollReveal>
         </div>
       )}
 
       {/* FreeReels Content */}
       {isFreeReels && (
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <FreeReelsHome />
+          <AdsDisplay position="banner" />
+          <ScrollReveal>
+            <FreeReelsHome />
+          </ScrollReveal>
         </div>
       )}
+
+      {/* Floating Action Buttons */}
+      <BackToTop />
+      <DarkModeToggle />
     </main>
   );
 }
-
