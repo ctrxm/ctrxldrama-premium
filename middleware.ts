@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function proxy(request: NextRequest) {
-  // Rate limiting removed - unlimited requests
+export function middleware(request: NextRequest) {
+  // No rate limiting - unlimited requests for all users
   return NextResponse.next();
 }
 
