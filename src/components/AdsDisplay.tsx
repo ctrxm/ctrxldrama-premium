@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { X, ExternalLink } from 'lucide-react';
+import { X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -123,54 +123,68 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
     }
   }
 
-  // AdSense-style "Ad" badge component
-  const AdBadge = () => (
-    <div className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium text-muted-foreground border border-border rounded">
-      Ad
+  // Google AdSense-style container wrapper
+  const AdContainer = ({ children, showBadge = true }: { children: React.ReactNode; showBadge?: boolean }) => (
+    <div className="relative">
+      {showBadge && (
+        <div className="absolute -top-4 right-0 z-10">
+          <div className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-normal text-gray-500 dark:text-gray-400">
+            <svg className="w-2.5 h-2.5" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm.75 11.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM8 10a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v4.5A.75.75 0 0 1 8 10z"/>
+            </svg>
+            <span>Ad</span>
+          </div>
+        </div>
+      )}
+      <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-sm overflow-hidden shadow-sm">
+        {children}
+      </div>
     </div>
   );
 
   // Popup Ad
   if (position === 'popup' && showPopup && !popupDismissed) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-        <div className={`relative max-w-2xl w-full bg-background rounded-lg shadow-2xl overflow-hidden border border-border ${className}`}>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+        <div className="relative max-w-2xl w-full">
           <button
             onClick={handleClosePopup}
-            className="absolute top-3 right-3 z-10 p-1.5 rounded-md bg-background/80 hover:bg-accent border border-border transition-colors"
+            className="absolute -top-10 right-0 z-10 p-2 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-lg"
             aria-label="Close ad"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
           
-          <div className="p-3 border-b border-border flex items-center justify-between">
-            <AdBadge />
-            <span className="text-xs text-muted-foreground">Advertisement</span>
-          </div>
+          <AdContainer showBadge={false}>
+            <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+              <div className="flex items-center gap-1.5">
+                <svg className="w-3 h-3 text-gray-500" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm.75 11.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM8 10a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v4.5A.75.75 0 0 1 8 10z"/>
+                </svg>
+                <span className="text-[10px] text-gray-600 dark:text-gray-400 font-normal">Advertisement</span>
+              </div>
+            </div>
 
-          <Link href={currentAd.link_url} target="_blank" rel="noopener noreferrer" className="block group">
-            {currentAd.ad_type === 'banner' && currentAd.image_url ? (
-              <div className="relative w-full aspect-video bg-accent">
-                <Image
-                  src={currentAd.image_url}
-                  alt={currentAd.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="p-8 md:p-12 hover:bg-accent/50 transition-colors">
-                <h3 className="text-xl md:text-2xl font-semibold mb-3 text-foreground">{currentAd.text_content}</h3>
-                {currentAd.description && (
-                  <p className="text-muted-foreground mb-4 leading-relaxed">{currentAd.description}</p>
-                )}
-                <div className="inline-flex items-center gap-2 text-primary text-sm font-medium">
-                  <span>Learn More</span>
-                  <ExternalLink className="w-4 h-4" />
+            <Link href={currentAd.link_url} target="_blank" rel="noopener noreferrer" className="block">
+              {currentAd.ad_type === 'banner' && currentAd.image_url ? (
+                <div className="relative w-full aspect-video bg-gray-100 dark:bg-gray-800">
+                  <Image
+                    src={currentAd.image_url}
+                    alt={currentAd.title}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-              </div>
-            )}
-          </Link>
+              ) : (
+                <div className="p-8 md:p-12 bg-white dark:bg-gray-900">
+                  <h3 className="text-lg md:text-xl font-normal mb-2 text-gray-900 dark:text-gray-100">{currentAd.text_content}</h3>
+                  {currentAd.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{currentAd.description}</p>
+                  )}
+                </div>
+              )}
+            </Link>
+          </AdContainer>
         </div>
       </div>
     );
@@ -179,47 +193,36 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
   // Banner Ad
   if (position === 'banner') {
     return (
-      <div className={`w-full overflow-hidden ${className}`}>
-        <div className="mb-2">
-          <AdBadge />
-        </div>
-        <Link 
-          href={currentAd.link_url} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="block group border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors bg-background"
-        >
-          {currentAd.ad_type === 'banner' && currentAd.image_url ? (
-            <div className="relative w-full aspect-[6/1] md:aspect-[8/1] bg-accent">
-              <Image
-                src={currentAd.image_url}
-                alt={currentAd.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : (
-            <div className="p-6 md:p-8 hover:bg-accent/50 transition-colors">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="text-base md:text-lg font-semibold mb-1.5 text-foreground">{currentAd.text_content}</h3>
-                  {currentAd.description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">{currentAd.description}</p>
-                  )}
-                </div>
-                <ExternalLink className="w-4 h-4 text-primary flex-shrink-0" />
+      <div className={`w-full ${className}`}>
+        <AdContainer>
+          <Link href={currentAd.link_url} target="_blank" rel="noopener noreferrer" className="block">
+            {currentAd.ad_type === 'banner' && currentAd.image_url ? (
+              <div className="relative w-full aspect-[6/1] md:aspect-[8/1] bg-gray-100 dark:bg-gray-800">
+                <Image
+                  src={currentAd.image_url}
+                  alt={currentAd.title}
+                  fill
+                  className="object-cover"
+                />
               </div>
-            </div>
-          )}
-        </Link>
+            ) : (
+              <div className="p-4 md:p-6 bg-white dark:bg-gray-900">
+                <h3 className="text-sm md:text-base font-normal mb-1 text-gray-900 dark:text-gray-100">{currentAd.text_content}</h3>
+                {currentAd.description && (
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{currentAd.description}</p>
+                )}
+              </div>
+            )}
+          </Link>
+        </AdContainer>
         {ads.length > 1 && (
-          <div className="flex justify-center gap-1.5 mt-3">
+          <div className="flex justify-center gap-1.5 mt-2">
             {ads.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentAdIndex(index)}
                 className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                  index === currentAdIndex ? 'bg-primary' : 'bg-border'
+                  index === currentAdIndex ? 'bg-gray-400' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
                 aria-label={`Show ad ${index + 1}`}
               />
@@ -233,38 +236,28 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
   // Sidebar Ad
   if (position === 'sidebar') {
     return (
-      <div className={`overflow-hidden ${className}`}>
-        <div className="mb-2">
-          <AdBadge />
-        </div>
-        <Link 
-          href={currentAd.link_url} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="block group border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors bg-background"
-        >
-          {currentAd.ad_type === 'banner' && currentAd.image_url ? (
-            <div className="relative w-full aspect-square bg-accent">
-              <Image
-                src={currentAd.image_url}
-                alt={currentAd.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : (
-            <div className="p-6 hover:bg-accent/50 transition-colors">
-              <h3 className="font-semibold mb-2 text-foreground">{currentAd.text_content}</h3>
-              {currentAd.description && (
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{currentAd.description}</p>
-              )}
-              <div className="inline-flex items-center gap-2 text-primary text-sm">
-                <span>Learn More</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+      <div className={`${className}`}>
+        <AdContainer>
+          <Link href={currentAd.link_url} target="_blank" rel="noopener noreferrer" className="block">
+            {currentAd.ad_type === 'banner' && currentAd.image_url ? (
+              <div className="relative w-full aspect-square bg-gray-100 dark:bg-gray-800">
+                <Image
+                  src={currentAd.image_url}
+                  alt={currentAd.title}
+                  fill
+                  className="object-cover"
+                />
               </div>
-            </div>
-          )}
-        </Link>
+            ) : (
+              <div className="p-4 bg-white dark:bg-gray-900">
+                <h3 className="text-sm font-normal mb-1.5 text-gray-900 dark:text-gray-100">{currentAd.text_content}</h3>
+                {currentAd.description && (
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{currentAd.description}</p>
+                )}
+              </div>
+            )}
+          </Link>
+        </AdContainer>
       </div>
     );
   }
@@ -272,38 +265,30 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
   // Inline Ad
   if (position === 'inline') {
     return (
-      <div className={`my-8 ${className}`}>
-        <div className="mb-2 text-center">
-          <AdBadge />
-        </div>
-        <Link 
-          href={currentAd.link_url} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="block group border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors bg-background"
-        >
-          {currentAd.ad_type === 'banner' && currentAd.image_url ? (
-            <div className="relative w-full aspect-[3/1] bg-accent">
-              <Image
-                src={currentAd.image_url}
-                alt={currentAd.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : (
-            <div className="p-8 text-center hover:bg-accent/50 transition-colors">
-              <h3 className="text-lg font-semibold mb-2 text-foreground">{currentAd.text_content}</h3>
-              {currentAd.description && (
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed max-w-2xl mx-auto">{currentAd.description}</p>
+      <div className={`my-8 flex justify-center ${className}`}>
+        <div className="w-full max-w-4xl">
+          <AdContainer>
+            <Link href={currentAd.link_url} target="_blank" rel="noopener noreferrer" className="block">
+              {currentAd.ad_type === 'banner' && currentAd.image_url ? (
+                <div className="relative w-full aspect-[3/1] bg-gray-100 dark:bg-gray-800">
+                  <Image
+                    src={currentAd.image_url}
+                    alt={currentAd.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="p-6 md:p-8 text-center bg-white dark:bg-gray-900">
+                  <h3 className="text-base md:text-lg font-normal mb-2 text-gray-900 dark:text-gray-100">{currentAd.text_content}</h3>
+                  {currentAd.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{currentAd.description}</p>
+                  )}
+                </div>
               )}
-              <div className="inline-flex items-center gap-2 text-primary font-medium">
-                <span>Learn More</span>
-                <ExternalLink className="w-4 h-4" />
-              </div>
-            </div>
-          )}
-        </Link>
+            </Link>
+          </AdContainer>
+        </div>
       </div>
     );
   }
@@ -313,45 +298,45 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
     return (
       <div className={`fixed bottom-16 md:bottom-0 left-0 right-0 z-40 ${className}`}>
         <div className="container-corporate py-2">
-          <div className="relative bg-background border border-border rounded-lg overflow-hidden shadow-lg">
-            <div className="absolute top-2 left-2 z-10">
-              <AdBadge />
-            </div>
+          <div className="relative">
             <button
               onClick={handleCloseBottom}
-              className="absolute top-2 right-2 z-10 p-1.5 rounded-md bg-background/80 hover:bg-accent border border-border transition-colors"
+              className="absolute -top-8 right-2 z-10 p-1.5 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-md"
               aria-label="Close ad"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-gray-700 dark:text-gray-300" />
             </button>
             
-            <Link 
-              href={currentAd.link_url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block group pt-8"
-            >
-              {currentAd.ad_type === 'banner' && currentAd.image_url ? (
-                <div className="relative w-full h-20 md:h-24 bg-accent">
-                  <Image
-                    src={currentAd.image_url}
-                    alt={currentAd.title}
-                    fill
-                    className="object-cover"
-                  />
+            <AdContainer showBadge={false}>
+              <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-2.5 h-2.5 text-gray-500" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm.75 11.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM8 10a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v4.5A.75.75 0 0 1 8 10z"/>
+                  </svg>
+                  <span className="text-[9px] text-gray-600 dark:text-gray-400 font-normal">Ad</span>
                 </div>
-              ) : (
-                <div className="p-4 flex items-center justify-between gap-4 hover:bg-accent/50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm md:text-base truncate text-foreground">{currentAd.text_content}</h3>
+              </div>
+
+              <Link href={currentAd.link_url} target="_blank" rel="noopener noreferrer" className="block">
+                {currentAd.ad_type === 'banner' && currentAd.image_url ? (
+                  <div className="relative w-full h-20 md:h-24 bg-gray-100 dark:bg-gray-800">
+                    <Image
+                      src={currentAd.image_url}
+                      alt={currentAd.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="p-3 md:p-4 bg-white dark:bg-gray-900">
+                    <h3 className="text-sm font-normal mb-0.5 text-gray-900 dark:text-gray-100 truncate">{currentAd.text_content}</h3>
                     {currentAd.description && (
-                      <p className="text-xs text-muted-foreground truncate">{currentAd.description}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{currentAd.description}</p>
                     )}
                   </div>
-                  <ExternalLink className="w-4 h-4 text-primary flex-shrink-0" />
-                </div>
-              )}
-            </Link>
+                )}
+              </Link>
+            </AdContainer>
           </div>
         </div>
       </div>
