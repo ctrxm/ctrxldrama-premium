@@ -31,7 +31,7 @@ export function InfiniteFlickReelsSection({ title }: InfiniteFlickReelsSectionPr
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '200px' }
     );
 
     if (loadMoreRef.current) {
@@ -103,11 +103,11 @@ export function InfiniteFlickReelsSection({ title }: InfiniteFlickReelsSectionPr
       </div>
 
       {/* Loading Indicator & Trigger */}
-      <div ref={loadMoreRef} className="py-8 flex justify-center w-full">
+      <div ref={loadMoreRef} className="py-8 flex justify-center w-full min-h-[100px]">
         {isFetchingNextPage ? (
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         ) : hasNextPage ? (
-          <div className="h-4" /> // Invisible trigger
+          <div className="h-20 w-full" /> // Invisible trigger
         ) : (
           <p className="text-muted-foreground text-sm">Sudah mencapai akhir daftar</p>
         )}

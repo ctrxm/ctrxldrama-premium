@@ -31,7 +31,10 @@ export function InfiniteDramaSection({ title }: InfiniteDramaSectionProps) {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '200px' // Trigger 200px before reaching the element
+      }
     );
 
     if (loadMoreRef.current) {
@@ -108,11 +111,11 @@ export function InfiniteDramaSection({ title }: InfiniteDramaSectionProps) {
       </div>
 
       {/* Loading Indicator & Trigger */}
-      <div ref={loadMoreRef} className="py-8 flex justify-center w-full">
+      <div ref={loadMoreRef} className="py-8 flex justify-center w-full min-h-[100px]">
         {isFetchingNextPage ? (
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         ) : hasNextPage ? (
-          <div className="h-4" /> // Invisible trigger
+          <div className="h-20 w-full" /> {/* Larger invisible trigger */}
         ) : (
           <p className="text-muted-foreground text-sm">Sudah mencapai akhir daftar</p>
         )}
