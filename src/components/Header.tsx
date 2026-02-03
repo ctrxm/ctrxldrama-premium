@@ -13,6 +13,8 @@ import { useFreeReelsSearch } from "@/hooks/useFreeReels";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { User, LogOut } from "lucide-react";
 
 export function Header() {
   const pathname = usePathname();
@@ -110,6 +112,9 @@ export function Header() {
               Search dramas...
             </span>
           </button>
+
+          {/* Auth Buttons */}
+          <AuthButtons />
         </div>
       </div>
 
@@ -374,5 +379,49 @@ export function Header() {
           document.body
         )}
     </header>
+  );
+}
+
+function AuthButtons() {
+  const { user, isAdmin, signOut } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-2">
+        <Link
+          href="/login"
+          className="px-4 py-2 rounded-lg border border-border hover:border-primary/50 transition-all text-sm font-medium"
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/register"
+          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all text-sm font-medium"
+        >
+          Sign Up
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className="px-4 py-2 rounded-lg border border-primary/50 bg-primary/10 hover:bg-primary/20 transition-all text-sm font-medium flex items-center gap-2"
+        >
+          <User className="w-4 h-4" />
+          Admin
+        </Link>
+      )}
+      <button
+        onClick={() => signOut()}
+        className="px-4 py-2 rounded-lg border border-border hover:border-destructive/50 hover:text-destructive transition-all text-sm font-medium flex items-center gap-2"
+      >
+        <LogOut className="w-4 h-4" />
+        Sign Out
+      </button>
+    </div>
   );
 }
