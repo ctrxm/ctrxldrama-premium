@@ -56,8 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
-      setUserRole(data?.role || 'user');
+      if (error) {
+        console.error('Error fetching user role:', error);
+        setUserRole('user');
+      } else {
+        setUserRole(data?.role || 'user');
+      }
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole('user');
@@ -75,19 +79,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) throw error;
-
-    // Create user record in public.users table
-    if (data.user) {
-      await supabase.from('users').insert({
-        id: data.user.id,
-        email: data.user.email!,
-        role: 'user',
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        },
       });
+
+      if (error) {
+        console.error('Signup error:', error);
+        throw new Error(error.message || 'Failed to sign up');
+      }
+
+      if (!data.user) {
+        throw new Error('No user data returned from signup');
+      }
+
+      // User record will be created automatically by trigger
+      // Wait a bit for the trigger to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log('Signup successful:', data.user.email);
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      throw error;
     }
   };
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -12,12 +12,14 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const { signUp } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(false);
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -33,9 +35,33 @@ export default function RegisterPage() {
 
     try {
       await signUp(email, password);
-      router.push('/');
+      setSuccess(true);
+      
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to sign up');
+      console.error('Registration error:', err);
+      
+      // Better error messages
+      let errorMessage = 'Failed to sign up';
+      
+      if (err.message) {
+        if (err.message.includes('already registered')) {
+          errorMessage = 'This email is already registered. Please sign in instead.';
+        } else if (err.message.includes('invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (err.message.includes('weak password')) {
+          errorMessage = 'Password is too weak. Please use a stronger password.';
+        } else if (err.message.includes('network')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -57,6 +83,13 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {success && (
+              <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 text-sm flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                Account created successfully! Redirecting...
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Email
@@ -67,6 +100,7 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading || success}
                 className="search-input"
                 placeholder="your@email.com"
               />
@@ -82,9 +116,14 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading || success}
                 className="search-input"
                 placeholder="••••••••"
+                minLength={6}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                At least 6 characters
+              </p>
             </div>
 
             <div>
@@ -97,6 +136,7 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={loading || success}
                 className="search-input"
                 placeholder="••••••••"
               />
@@ -104,11 +144,12 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || success}
               className="btn-corporate w-full flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {success && <CheckCircle className="w-4 h-4" />}
+              {loading ? 'Creating account...' : success ? 'Success!' : 'Sign Up'}
             </button>
           </form>
 
