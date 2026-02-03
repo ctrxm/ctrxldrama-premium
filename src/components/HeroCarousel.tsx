@@ -54,6 +54,7 @@ export function HeroCarousel({ dramas, isLoading }: HeroCarouselProps) {
           alt={currentDrama.bookName || currentDrama.name || currentDrama.book_name}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
+          unoptimized
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>

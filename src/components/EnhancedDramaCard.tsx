@@ -102,6 +102,7 @@ export function EnhancedDramaCard({ drama, platform = 'dramabox', showAnimation 
           alt={dramaTitle}
           fill
           className="object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-75"
+          unoptimized
         />
 
         {/* Gradient Overlay */}

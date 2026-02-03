@@ -83,6 +83,7 @@ export function ContinueWatching() {
                   alt={item.drama_title}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  unoptimized
                 />
                 
                 {/* Play Overlay */}

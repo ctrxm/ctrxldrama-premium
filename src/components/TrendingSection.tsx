@@ -54,6 +54,11 @@ export function TrendingSection({ dramas, isLoading, platform = 'dramabox' }: Tr
           const dramaCover = drama.cover || drama.cover_url || drama.thumb_url;
           const dramaRating = drama.rating || drama.score;
 
+          // Skip if no valid data
+          if (!dramaId || !dramaTitle || !dramaCover) {
+            return null;
+          }
+
           return (
             <Link
               key={dramaId}
@@ -90,6 +95,7 @@ export function TrendingSection({ dramas, isLoading, platform = 'dramabox' }: Tr
                   alt={dramaTitle}
                   fill
                   className="object-cover transition-all duration-300 group-hover:scale-110 group-hover:brightness-75"
+                  unoptimized
                 />
                 
                 {/* Hover Overlay */}
