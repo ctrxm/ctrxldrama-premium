@@ -103,62 +103,62 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-12">
+    <div className="min-h-screen pt-20 md:pt-24 px-3 md:px-4 pb-6 md:pb-12">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Live statistics and management</p>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Live statistics and management</p>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card-corporate p-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+          <div className="card-corporate p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-lg bg-primary/10">
                 <Eye className="w-6 h-6 text-primary" />
               </div>
               <Activity className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="text-2xl font-bold mb-1">
+            <h3 className="text-xl md:text-2xl font-bold mb-1">
               {stats?.total_views.toLocaleString() || 0}
             </h3>
             <p className="text-sm text-muted-foreground">Total Views</p>
           </div>
 
-          <div className="card-corporate p-6">
+          <div className="card-corporate p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-lg bg-primary/10">
                 <Users className="w-6 h-6 text-primary" />
               </div>
               <Activity className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="text-2xl font-bold mb-1">
+            <h3 className="text-xl md:text-2xl font-bold mb-1">
               {stats?.total_users.toLocaleString() || 0}
             </h3>
             <p className="text-sm text-muted-foreground">Total Users</p>
           </div>
 
-          <div className="card-corporate p-6">
+          <div className="card-corporate p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-lg bg-primary/10">
                 <Users className="w-6 h-6 text-primary" />
               </div>
               <Activity className="w-5 h-5 text-green-500 animate-pulse" />
             </div>
-            <h3 className="text-2xl font-bold mb-1">
+            <h3 className="text-xl md:text-2xl font-bold mb-1">
               {stats?.active_users.toLocaleString() || 0}
             </h3>
             <p className="text-sm text-muted-foreground">Active Users</p>
           </div>
 
-          <div className="card-corporate p-6">
+          <div className="card-corporate p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-lg bg-primary/10">
                 <Film className="w-6 h-6 text-primary" />
               </div>
               <Activity className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="text-2xl font-bold mb-1">
+            <h3 className="text-xl md:text-2xl font-bold mb-1">
               {stats?.total_dramas.toLocaleString() || 0}
             </h3>
             <p className="text-sm text-muted-foreground">Total Dramas</p>
@@ -166,9 +166,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="card-corporate p-6">
-            <h2 className="text-xl font-bold mb-6">Views Trend</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+                <div className="card-corporate p-4 md:p-6">
+            <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6">Views Trend</h2>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -192,8 +192,8 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="card-corporate p-6">
-            <h2 className="text-xl font-bold mb-6">Users Trend</h2>
+            <div className="card-corporate p-4 md:p-6">
+            <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6">Users Trend</h2>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -219,12 +219,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <button
             onClick={() => router.push('/admin/ads')}
-            className="card-corporate p-6 hover:border-primary/50 transition-colors text-left"
+            className="card-corporate p-4 md:p-6 hover:border-primary/50 transition-colors text-left"
           >
-            <h3 className="text-lg font-bold mb-2">Manage Ads</h3>
+            <h3 className="text-base md:text-lg font-bold mb-2">Manage Ads</h3>
             <p className="text-sm text-muted-foreground">
               Create and manage advertisement placements
             </p>
@@ -232,9 +232,9 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => router.push('/admin/maintenance')}
-            className="card-corporate p-6 hover:border-primary/50 transition-colors text-left"
+            className="card-corporate p-4 md:p-6 hover:border-primary/50 transition-colors text-left"
           >
-            <h3 className="text-lg font-bold mb-2">Maintenance Mode</h3>
+            <h3 className="text-base md:text-lg font-bold mb-2">Maintenance Mode</h3>
             <p className="text-sm text-muted-foreground">
               Enable or disable site maintenance
             </p>
@@ -242,9 +242,9 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => router.push('/admin/users')}
-            className="card-corporate p-6 hover:border-primary/50 transition-colors text-left"
+            className="card-corporate p-4 md:p-6 hover:border-primary/50 transition-colors text-left"
           >
-            <h3 className="text-lg font-bold mb-2">User Management</h3>
+            <h3 className="text-base md:text-lg font-bold mb-2">User Management</h3>
             <p className="text-sm text-muted-foreground">
               View and manage registered users
             </p>
