@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use fallback values for build time if env vars not set
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTI4MDAsImV4cCI6MTk2MDc2ODgwMH0.placeholder';
+// Real Supabase credentials (anon key is safe to expose publicly)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ymcjoloqemofuhiomdgk.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltY2pvbG9xZW1vZnVoaW9tZGdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4MzAxMjQsImV4cCI6MjA4NTQwNjEyNH0.WmkqB1Ro9iVBB8w1NTr7Oy8a0CXqtMH-Zb1CS38wSGc';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
