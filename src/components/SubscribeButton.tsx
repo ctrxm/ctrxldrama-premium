@@ -1,7 +1,6 @@
 "use client";
 
 import { Bell, BellOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -32,7 +31,7 @@ export function SubscribeButton({
     e.stopPropagation();
 
     if (!user) {
-      toast.error('Silakan login terlebih dahulu');
+      toast.error('Please sign in first');
       return;
     }
 
@@ -40,16 +39,16 @@ export function SubscribeButton({
       unsubscribe(
         { drama_id, platform },
         {
-          onSuccess: () => toast.success('Notifikasi dimatikan'),
-          onError: () => toast.error('Gagal mematikan notifikasi'),
+          onSuccess: () => toast.success('Notifications disabled'),
+          onError: () => toast.error('Failed to disable notifications'),
         }
       );
     } else {
       subscribe(
         { drama_id, platform, drama_title },
         {
-          onSuccess: () => toast.success('Akan diberitahu episode baru'),
-          onError: () => toast.error('Gagal mengaktifkan notifikasi'),
+          onSuccess: () => toast.success('You will be notified of new episodes'),
+          onError: () => toast.error('Failed to enable notifications'),
         }
       );
     }
@@ -60,37 +59,40 @@ export function SubscribeButton({
       <button
         onClick={handleClick}
         className={cn(
-          'p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors',
+          'btn-icon bg-black/50',
           className
         )}
-        title={subscribed ? 'Matikan notifikasi' : 'Nyalakan notifikasi'}
+        title={subscribed ? 'Disable notifications' : 'Enable notifications'}
       >
         {subscribed ? (
-          <BellOff className="w-5 h-5 text-yellow-400" />
+          <BellOff className="w-4 h-4 text-primary" />
         ) : (
-          <Bell className="w-5 h-5 text-white" />
+          <Bell className="w-4 h-4 text-white" />
         )}
       </button>
     );
   }
 
   return (
-    <Button
+    <button
       onClick={handleClick}
-      variant={subscribed ? 'default' : 'outline'}
-      className={className}
+      className={cn(
+        subscribed ? 'btn-primary' : 'btn-secondary',
+        'gap-2',
+        className
+      )}
     >
       {subscribed ? (
         <>
-          <BellOff className="w-4 h-4 mr-2" />
-          Matikan Notifikasi
+          <BellOff className="w-4 h-4" />
+          Disable Notifications
         </>
       ) : (
         <>
-          <Bell className="w-4 h-4 mr-2" />
-          Notifikasi Episode Baru
+          <Bell className="w-4 h-4" />
+          Notify New Episodes
         </>
       )}
-    </Button>
+    </button>
   );
 }
