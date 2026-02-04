@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Users, Eye, Film, Activity } from 'lucide-react';
+import { Loader2, Users, Eye, Film, Activity, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Statistics {
@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     console.log('[AdminDashboard] Auth state:', { 
@@ -80,6 +81,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const refreshStatistics = async () => {
+    setRefreshing(true);
+    try {
+      const response = await fetch('/api/admin/update-stats', { method: 'POST' });
+      const data = await response.json();
+      if (data.stats) {
+        setStats(data.stats);
+      } else {
+        await fetchStatistics();
+      }
+    } catch (error) {
+      console.error('Error refreshing statistics:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -105,9 +123,19 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen pt-20 md:pt-24 px-3 md:px-4 pb-6 md:pb-12">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Live statistics and management</p>
+        <div className="mb-6 md:mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Live statistics and management</p>
+          </div>
+          <button
+            onClick={refreshStatistics}
+            disabled={refreshing}
+            className="btn-secondary gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh Stats'}
+          </button>
         </div>
 
         {/* Statistics Cards */}
