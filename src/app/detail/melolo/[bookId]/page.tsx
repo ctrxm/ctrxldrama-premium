@@ -7,6 +7,13 @@ import { Play, ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
+import { SubscribeButton } from "@/components/SubscribeButton";
+import { RatingStars } from "@/components/RatingStars";
+import { CommentsSection } from "@/components/CommentsSection";
+import { ReviewsList } from "@/components/ReviewsList";
 
 export default function MeloloDetailPage() {
   const params = useParams<{ bookId: string }>();
@@ -80,6 +87,20 @@ export default function MeloloDetailPage() {
                   </Link>
                 </div>
               )}
+              <div className="absolute top-3 right-3 flex flex-col gap-2">
+                <FavoriteButton
+                  drama_id={params.bookId}
+                  platform="melolo"
+                  drama_title={drama.series_title}
+                  drama_cover={drama.series_cover}
+                />
+                <ShareButton title={drama.series_title} description={drama.series_intro?.slice(0, 100)} />
+                <SubscribeButton
+                  drama_id={params.bookId}
+                  platform="melolo"
+                  drama_title={drama.series_title}
+                />
+              </div>
             </div>
 
             {/* Info */}
@@ -105,6 +126,12 @@ export default function MeloloDetailPage() {
                 </p>
               </div>
 
+              {/* Rating */}
+              <div className="glass rounded-xl p-4">
+                <h3 className="font-semibold text-foreground mb-3">Beri Rating</h3>
+                <RatingStars drama_id={params.bookId} platform="melolo" showReview size="lg" />
+              </div>
+
               {/* Watch Button */}
               {firstEpisodeId && (
                 <Link
@@ -121,6 +148,22 @@ export default function MeloloDetailPage() {
 
 
         </div>
+      </div>
+
+      {/* Reviews & Comments Tabs */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Tabs defaultValue="reviews" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="reviews">Ulasan</TabsTrigger>
+            <TabsTrigger value="comments">Komentar</TabsTrigger>
+          </TabsList>
+          <TabsContent value="reviews">
+            <ReviewsList drama_id={params.bookId} platform="melolo" />
+          </TabsContent>
+          <TabsContent value="comments">
+            <CommentsSection drama_id={params.bookId} platform="melolo" />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );

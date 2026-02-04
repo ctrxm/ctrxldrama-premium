@@ -5,8 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import { Play, ChevronLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnifiedErrorDisplay } from "@/components/UnifiedErrorDisplay";
 import { Badge } from "@/components/ui/badge";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
+import { SubscribeButton } from "@/components/SubscribeButton";
+import { RatingStars } from "@/components/RatingStars";
+import { CommentsSection } from "@/components/CommentsSection";
+import { ReviewsList } from "@/components/ReviewsList";
 
 export default function FlickReelsDetailPage() {
   const params = useParams();
@@ -78,6 +85,20 @@ export default function FlickReelsDetailPage() {
                   </Link>
                 </div>
               )}
+              <div className="absolute top-3 right-3 flex flex-col gap-2">
+                <FavoriteButton
+                  drama_id={bookId}
+                  platform="flickreels"
+                  drama_title={drama.title}
+                  drama_cover={drama.cover}
+                />
+                <ShareButton title={drama.title} description={drama.description?.slice(0, 100)} />
+                <SubscribeButton
+                  drama_id={bookId}
+                  platform="flickreels"
+                  drama_title={drama.title}
+                />
+              </div>
             </div>
 
             {/* Info */}
@@ -118,6 +139,12 @@ export default function FlickReelsDetailPage() {
                 </p>
               </div>
 
+              {/* Rating */}
+              <div className="glass rounded-xl p-4">
+                <h3 className="font-semibold text-foreground mb-3">Beri Rating</h3>
+                <RatingStars drama_id={bookId} platform="flickreels" showReview size="lg" />
+              </div>
+
               {/* Watch Button */}
               {firstEpisode && (
                 <Link
@@ -132,6 +159,22 @@ export default function FlickReelsDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reviews & Comments Tabs */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Tabs defaultValue="reviews" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="reviews">Ulasan</TabsTrigger>
+            <TabsTrigger value="comments">Komentar</TabsTrigger>
+          </TabsList>
+          <TabsContent value="reviews">
+            <ReviewsList drama_id={bookId} platform="flickreels" />
+          </TabsContent>
+          <TabsContent value="comments">
+            <CommentsSection drama_id={bookId} platform="flickreels" />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );

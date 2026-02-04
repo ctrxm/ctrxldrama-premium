@@ -4,8 +4,15 @@ import { UnifiedErrorDisplay } from "@/components/UnifiedErrorDisplay";
 import { useQuery } from "@tanstack/react-query";
 import { Play, ChevronLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
+import { SubscribeButton } from "@/components/SubscribeButton";
+import { RatingStars } from "@/components/RatingStars";
+import { CommentsSection } from "@/components/CommentsSection";
+import { ReviewsList } from "@/components/ReviewsList";
 
 interface ReelShortDetailData {
   success: boolean;
@@ -91,6 +98,20 @@ export default function ReelShortDetailPage() {
                   Tonton Sekarang
                 </Link>
               </div>
+              <div className="absolute top-3 right-3 flex flex-col gap-2">
+                <FavoriteButton
+                  drama_id={data.bookId}
+                  platform="reelshort"
+                  drama_title={data.title}
+                  drama_cover={data.cover}
+                />
+                <ShareButton title={data.title} description={data.description?.slice(0, 100)} />
+                <SubscribeButton
+                  drama_id={data.bookId}
+                  platform="reelshort"
+                  drama_title={data.title}
+                />
+              </div>
             </div>
 
             {/* Info */}
@@ -117,6 +138,12 @@ export default function ReelShortDetailPage() {
                 </p>
               </div>
 
+              {/* Rating */}
+              <div className="glass rounded-xl p-4">
+                <h3 className="font-semibold text-foreground mb-3">Beri Rating</h3>
+                <RatingStars drama_id={data.bookId} platform="reelshort" showReview size="lg" />
+              </div>
+
               {/* Watch Button */}
               <Link
                 href={`/watch/reelshort/${data.bookId}`}
@@ -129,6 +156,22 @@ export default function ReelShortDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reviews & Comments Tabs */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Tabs defaultValue="reviews" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="reviews">Ulasan</TabsTrigger>
+            <TabsTrigger value="comments">Komentar</TabsTrigger>
+          </TabsList>
+          <TabsContent value="reviews">
+            <ReviewsList drama_id={data.bookId} platform="reelshort" />
+          </TabsContent>
+          <TabsContent value="comments">
+            <CommentsSection drama_id={data.bookId} platform="reelshort" />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );
