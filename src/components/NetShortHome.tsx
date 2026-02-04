@@ -31,7 +31,7 @@ export function NetShortHome() {
             {/* Card Grid Skeleton */}
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
               {Array.from({ length: 12 }).map((_, cardIndex) => (
-                <UnifiedMediaCardSkeleton key={cardIndex} index={cardIndex} />
+                <UnifiedMediaCardSkeleton key={cardIndex} />
               ))}
             </div>
           </div>
