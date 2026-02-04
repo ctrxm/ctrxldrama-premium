@@ -43,7 +43,7 @@ async function runMigration() {
     return;
   }
   
-  const connectionString = `postgresql://postgres:${dbPassword}@db.${projectRef}.supabase.co:5432/postgres`;
+  const connectionString = `postgresql://postgres.${projectRef}:${dbPassword}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`;
   const client = new pg.Client({ connectionString, ssl: { rejectUnauthorized: false } });
   
   try {
