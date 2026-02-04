@@ -2,9 +2,7 @@
 
 import { UnifiedErrorDisplay } from "@/components/UnifiedErrorDisplay";
 import { useDramaDetail } from "@/hooks/useDramaDetail";
-import { Play, Calendar, ChevronLeft } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Play, Calendar, ChevronLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import type { DramaDetailDirect, DramaDetailResponseLegacy } from "@/types/drama";
@@ -14,13 +12,12 @@ import { SubscribeButton } from "@/components/SubscribeButton";
 import { RatingStars } from "@/components/RatingStars";
 import { CommentsSection } from "@/components/CommentsSection";
 import { ReviewsList } from "@/components/ReviewsList";
+import { useState } from "react";
 
-// Helper to check if response is new format
 function isDirectFormat(data: unknown): data is DramaDetailDirect {
   return data !== null && typeof data === 'object' && 'bookId' in data && 'coverWap' in data;
 }
 
-// Helper to check if response is legacy format
 function isLegacyFormat(data: unknown): data is DramaDetailResponseLegacy {
   return data !== null && typeof data === 'object' && 'data' in data && (data as DramaDetailResponseLegacy).data?.book !== undefined;
 }
@@ -30,12 +27,12 @@ export default function DramaBoxDetailPage() {
   const bookId = params.bookId;
   const router = useRouter();
   const { data, isLoading, error } = useDramaDetail(bookId || "");
+  const [activeTab, setActiveTab] = useState<'reviews' | 'comments'>('reviews');
 
   if (isLoading) {
     return <DetailSkeleton />;
   }
 
-  // Handle both new and legacy API formats
   let book: {
     bookId: string;
     bookName: string;
@@ -47,7 +44,6 @@ export default function DramaBoxDetailPage() {
   } | null = null;
 
   if (isDirectFormat(data)) {
-    // New flat format
     book = {
       bookId: data.bookId,
       bookName: data.bookName,
@@ -58,7 +54,6 @@ export default function DramaBoxDetailPage() {
       shelfTime: data.shelfTime,
     };
   } else if (isLegacyFormat(data)) {
-    // Legacy nested format
     book = {
       bookId: data.data.book.bookId,
       bookName: data.data.book.bookName,
@@ -72,150 +67,147 @@ export default function DramaBoxDetailPage() {
 
   if (error || !book) {
     return (
-      <div className="min-h-screen pt-24 px-4">
+      <div className="min-h-screen pt-20 px-4">
         <UnifiedErrorDisplay 
-          title="Drama tidak ditemukan"
-          message="Tidak dapat memuat detail drama. Silakan coba lagi atau kembali ke beranda."
+          title="Not Found"
+          message="Unable to load drama details."
           onRetry={() => router.push('/')}
-          retryLabel="Kembali ke Beranda"
+          retryLabel="Back to Home"
         />
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen pt-20">
-      {/* Hero Section with Cover */}
-      <div className="relative">
-        {/* Background Blur */}
-        <div className="absolute inset-0 overflow-hidden">
-          <img
-            src={book.cover}
-            alt=""
-            className="w-full h-full object-cover opacity-20 blur-3xl scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 py-8">
-          {/* Back Button */}
+    <main className="min-h-screen pt-14 pb-20">
+      <div className="border-b border-border">
+        <div className="container-main py-4">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
-            <span>Kembali</span>
+            <ChevronLeft className="w-4 h-4" />
+            <span className="text-sm">Back</span>
           </button>
-
-          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
-            {/* Cover */}
-            <div className="relative group">
-              <img
-                src={book.cover}
-                alt={book.bookName}
-                className="w-full max-w-[300px] mx-auto rounded-2xl shadow-2xl"
-              />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
-                <Link
-                  href={`/watch/dramabox/${book.bookId}`}
-                  className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg"
-                >
-                  <Play className="w-5 h-5 fill-current" />
-                  Tonton Sekarang
-                </Link>
-              </div>
-              <div className="absolute top-3 right-3 flex flex-col gap-2">
-                <FavoriteButton
-                  drama_id={book.bookId}
-                  platform="dramabox"
-                  drama_title={book.bookName}
-                  drama_cover={book.cover}
-                  drama_genre={book.tags?.[0]}
-                />
-                <ShareButton title={book.bookName} description={book.introduction?.slice(0, 100)} />
-                <SubscribeButton
-                  drama_id={book.bookId}
-                  platform="dramabox"
-                  drama_title={book.bookName}
-                />
-              </div>
-            </div>
-
-            {/* Info */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold font-display gradient-text mb-4">
-                  {book.bookName}
-                </h1>
-
-                {/* Stats */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Play className="w-4 h-4" />
-                    <span>{book.chapterCount} Episode</span>
-                  </div>
-                  {book.shelfTime && (
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4" />
-                      <span>{book.shelfTime?.split(" ")[0]}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Tags */}
-              {book.tags && book.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {book.tags.map((tag) => (
-                    <span key={tag} className="tag-pill">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Description */}
-              <div className="glass rounded-xl p-4">
-                <h3 className="font-semibold text-foreground mb-2">Sinopsis</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {book.introduction}
-                </p>
-              </div>
-
-              {/* Rating */}
-              <div className="glass rounded-xl p-4">
-                <h3 className="font-semibold text-foreground mb-3">Beri Rating</h3>
-                <RatingStars drama_id={book.bookId} platform="dramabox" showReview size="lg" />
-              </div>
-
-              {/* Watch Button */}
-              <Link
-                href={`/watch/dramabox/${book.bookId}`}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-primary-foreground transition-all hover:scale-105 shadow-lg"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <Play className="w-5 h-5 fill-current" />
-                Mulai Menonton
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Reviews & Comments Tabs */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Tabs defaultValue="reviews" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="reviews">Ulasan</TabsTrigger>
-            <TabsTrigger value="comments">Komentar</TabsTrigger>
-          </TabsList>
-          <TabsContent value="reviews">
-            <ReviewsList drama_id={book.bookId} platform="dramabox" />
-          </TabsContent>
-          <TabsContent value="comments">
-            <CommentsSection drama_id={book.bookId} platform="dramabox" />
-          </TabsContent>
-        </Tabs>
+      <div className="container-main py-6">
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
+          <div className="relative">
+            <div className="sticky top-20">
+              <div className="relative border border-border overflow-hidden">
+                <img
+                  src={book.cover}
+                  alt={book.bookName}
+                  className="w-full aspect-poster object-cover"
+                />
+                <div className="absolute top-2 right-2 flex flex-col gap-1">
+                  <FavoriteButton
+                    drama_id={book.bookId}
+                    platform="dramabox"
+                    drama_title={book.bookName}
+                    drama_cover={book.cover}
+                    drama_genre={book.tags?.[0]}
+                  />
+                  <ShareButton title={book.bookName} description={book.introduction?.slice(0, 100)} />
+                  <SubscribeButton
+                    drama_id={book.bookId}
+                    platform="dramabox"
+                    drama_title={book.bookName}
+                  />
+                </div>
+              </div>
+
+              <Link
+                href={`/watch/dramabox/${book.bookId}`}
+                className="btn-primary w-full mt-4 gap-2"
+              >
+                <Play className="w-4 h-4 fill-current" />
+                Watch Now
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">
+                {book.bookName}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Play className="w-3.5 h-3.5" />
+                  <span>{book.chapterCount} Episodes</span>
+                </div>
+                {book.shelfTime && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{book.shelfTime?.split(" ")[0]}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {book.tags && book.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {book.tags.map((tag) => (
+                  <span key={tag} className="badge-count">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div>
+              <h3 className="text-label mb-2">Synopsis</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {book.introduction}
+              </p>
+            </div>
+
+            <div className="divider" />
+
+            <div>
+              <h3 className="text-label mb-3">Rate This Drama</h3>
+              <RatingStars drama_id={book.bookId} platform="dramabox" showReview size="lg" />
+            </div>
+
+            <div className="divider" />
+
+            <div>
+              <div className="flex items-center gap-4 border-b border-border mb-4">
+                <button
+                  onClick={() => setActiveTab('reviews')}
+                  className={`py-2 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors ${
+                    activeTab === 'reviews' 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Reviews
+                </button>
+                <button
+                  onClick={() => setActiveTab('comments')}
+                  className={`py-2 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors ${
+                    activeTab === 'comments' 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Comments
+                </button>
+              </div>
+
+              {activeTab === 'reviews' && (
+                <ReviewsList drama_id={book.bookId} platform="dramabox" />
+              )}
+              {activeTab === 'comments' && (
+                <CommentsSection drama_id={book.bookId} platform="dramabox" />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );
@@ -223,20 +215,22 @@ export default function DramaBoxDetailPage() {
 
 function DetailSkeleton() {
   return (
-    <main className="min-h-screen pt-24 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
-          <Skeleton className="aspect-[2/3] w-full max-w-[300px] rounded-2xl" />
+    <main className="min-h-screen pt-20">
+      <div className="container-main py-6">
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
+          <div>
+            <div className="aspect-poster skeleton-base" />
+            <div className="h-12 skeleton-base mt-4" />
+          </div>
           <div className="space-y-4">
-            <Skeleton className="h-10 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
+            <div className="h-8 skeleton-base w-3/4" />
+            <div className="h-5 skeleton-base w-1/2" />
             <div className="flex gap-2">
-              <Skeleton className="h-8 w-20 rounded-full" />
-              <Skeleton className="h-8 w-20 rounded-full" />
-              <Skeleton className="h-8 w-20 rounded-full" />
+              <div className="h-6 w-16 skeleton-base" />
+              <div className="h-6 w-16 skeleton-base" />
+              <div className="h-6 w-16 skeleton-base" />
             </div>
-            <Skeleton className="h-32 w-full rounded-xl" />
-            <Skeleton className="h-12 w-48 rounded-full" />
+            <div className="h-32 skeleton-base" />
           </div>
         </div>
       </div>

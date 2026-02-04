@@ -1,15 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, Settings, List, Play, Pause } from "lucide-react";
+import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import Hls from "hls.js";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface VideoItem {
   url: string;
@@ -45,39 +39,32 @@ export default function TikTokPlayer({
 }: TikTokPlayerProps) {
   const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [selectedQuality, setSelectedQuality] = useState<string>("auto");
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [showControls, setShowControls] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Get current episode data
   const currentEpisodeData = episodes.find(
     (ep) => ep.episodeNumber === currentEpisode
   );
 
-  // Get available quality options
   const qualityOptions = currentEpisodeData?.videoList.map((video, index) => {
-    let qualityLabel = "";
-    if (video.quality === 0) {
-      qualityLabel = `1080p (${video.encode})`;
-    } else {
-      qualityLabel = `${video.quality}p (${video.encode})`;
-    }
-
+    const qualityLabel = video.quality === 0 ? "1080p" : `${video.quality}p`;
     return {
       id: `${video.encode}-${video.quality}-${index}`,
-      label: qualityLabel,
+      label: `${qualityLabel} (${video.encode})`,
       quality: video.quality === 0 ? 1080 : video.quality,
       video,
     };
   }).sort((a, b) => b.quality - a.quality) || [];
 
-  // Get current video URL based on selected quality
   const getCurrentVideoUrl = useCallback(() => {
     if (!currentEpisodeData?.videoList?.length) return null;
 
@@ -92,7 +79,6 @@ export default function TikTokPlayer({
     return selected?.video || currentEpisodeData.videoList[0];
   }, [currentEpisodeData, selectedQuality, qualityOptions]);
 
-  // Load video source
   const loadVideo = useCallback((videoUrl: string) => {
     if (!videoRef.current) return;
 
@@ -120,7 +106,6 @@ export default function TikTokPlayer({
     }
   }, []);
 
-  // Setup HLS player when episode changes
   useEffect(() => {
     const currentVideo = getCurrentVideoUrl();
     if (!currentVideo || !videoRef.current) return;
@@ -135,15 +120,23 @@ export default function TikTokPlayer({
     };
   }, [currentEpisode, selectedQuality, getCurrentVideoUrl, loadVideo]);
 
-  // Handle video time update for progress bar
+  const resetControlsTimeout = useCallback(() => {
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    setShowControls(true);
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  }, []);
+
   const handleTimeUpdate = useCallback(() => {
     if (!videoRef.current) return;
     const video = videoRef.current;
-    const progress = (video.currentTime / video.duration) * 100;
-    setProgress(progress);
+    setProgress(video.currentTime);
+    setDuration(video.duration);
   }, []);
 
-  // Handle video ended - auto advance to next episode
   const handleVideoEnded = useCallback(() => {
     if (currentEpisode < totalEpisodes) {
       const nextEpisode = currentEpisode + 1;
@@ -153,7 +146,6 @@ export default function TikTokPlayer({
     }
   }, [currentEpisode, totalEpisodes, onEpisodeChange]);
 
-  // Toggle play/pause
   const togglePlayPause = useCallback(() => {
     if (!videoRef.current) return;
     
@@ -164,193 +156,211 @@ export default function TikTokPlayer({
       videoRef.current.pause();
       setIsPlaying(false);
     }
-  }, []);
+    resetControlsTimeout();
+  }, [resetControlsTimeout]);
 
-  // Handle swipe gestures
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientY);
-  };
+  const toggleMute = useCallback(() => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  }, [isMuted]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd || isTransitioning) return;
-
-    const distance = touchStart - touchEnd;
-    const minSwipeDistance = 50;
-
-    if (Math.abs(distance) < minSwipeDistance) return;
-
-    setIsTransitioning(true);
-
-    // Swipe up - next episode
-    if (distance > 0 && currentEpisode < totalEpisodes) {
-      const nextEpisode = currentEpisode + 1;
-      setCurrentEpisode(nextEpisode);
-      onEpisodeChange(nextEpisode);
-      setProgress(0);
-    }
-
-    // Swipe down - previous episode
-    if (distance < 0 && currentEpisode > 1) {
+  const goToPrevEpisode = useCallback(() => {
+    if (currentEpisode > 1) {
       const prevEpisode = currentEpisode - 1;
       setCurrentEpisode(prevEpisode);
       onEpisodeChange(prevEpisode);
       setProgress(0);
     }
+  }, [currentEpisode, onEpisodeChange]);
 
-    setTimeout(() => setIsTransitioning(false), 300);
-    setTouchStart(0);
-    setTouchEnd(0);
+  const goToNextEpisode = useCallback(() => {
+    if (currentEpisode < totalEpisodes) {
+      const nextEpisode = currentEpisode + 1;
+      setCurrentEpisode(nextEpisode);
+      onEpisodeChange(nextEpisode);
+      setProgress(0);
+    }
+  }, [currentEpisode, totalEpisodes, onEpisodeChange]);
+
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percent = x / rect.width;
+    const newTime = percent * duration;
+    videoRef.current.currentTime = newTime;
+    setProgress(newTime);
+  }, [duration]);
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp" && currentEpisode > 1 && !isTransitioning) {
-        const prevEpisode = currentEpisode - 1;
-        setCurrentEpisode(prevEpisode);
-        onEpisodeChange(prevEpisode);
-        setProgress(0);
-      } else if (e.key === "ArrowDown" && currentEpisode < totalEpisodes && !isTransitioning) {
-        const nextEpisode = currentEpisode + 1;
-        setCurrentEpisode(nextEpisode);
-        onEpisodeChange(nextEpisode);
-        setProgress(0);
-      } else if (e.key === " ") {
-        e.preventDefault();
-        togglePlayPause();
+      switch (e.key) {
+        case "ArrowUp":
+          goToPrevEpisode();
+          break;
+        case "ArrowDown":
+          goToNextEpisode();
+          break;
+        case " ":
+          e.preventDefault();
+          togglePlayPause();
+          break;
+        case "m":
+          toggleMute();
+          break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentEpisode, totalEpisodes, isTransitioning, onEpisodeChange, togglePlayPause]);
+  }, [goToPrevEpisode, goToNextEpisode, togglePlayPause, toggleMute]);
 
   return (
     <div
       ref={containerRef}
-      className="tiktok-player-container"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      className="tiktok-player"
+      onMouseMove={resetControlsTimeout}
+      onTouchStart={resetControlsTimeout}
     >
-      {/* Header Overlay */}
-      <div className="absolute top-0 left-0 right-0 z-40 safe-top">
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/80 to-transparent">
+      <video
+        ref={videoRef}
+        className="tiktok-video"
+        playsInline
+        autoPlay
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleVideoEnded}
+        onClick={togglePlayPause}
+      />
+
+      {!isPlaying && (
+        <button
+          onClick={togglePlayPause}
+          className="absolute inset-0 flex items-center justify-center z-20"
+        >
+          <div className="w-16 h-16 bg-black/60 flex items-center justify-center">
+            <Play className="w-8 h-8 text-white fill-white" />
+          </div>
+        </button>
+      )}
+
+      <div className={`tiktok-overlay transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="tiktok-nav">
           <Link
             href={`/detail/reelshort/${bookId}`}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+            className="btn-icon bg-black/50"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5 text-white" />
           </Link>
 
-          <div className="flex items-center gap-3">
-            {/* Quality Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="tiktok-control-btn w-10 h-10">
-                  <Settings className="w-5 h-5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="z-[100]">
-                <DropdownMenuItem
-                  onClick={() => setSelectedQuality("auto")}
-                  className={selectedQuality === "auto" ? "text-primary font-semibold" : ""}
-                >
-                  Auto (H264)
-                </DropdownMenuItem>
-                {qualityOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option.id}
-                    onClick={() => setSelectedQuality(option.id)}
-                    className={selectedQuality === option.id ? "text-primary font-semibold" : ""}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex-1 text-center">
+            <p className="text-white text-sm font-medium line-clamp-1">{title}</p>
+            <p className="text-white/60 text-xs">EP {currentEpisode} / {totalEpisodes}</p>
+          </div>
 
-            {/* Episode List Toggle */}
-            <button
-              onClick={onShowEpisodeList}
-              className="tiktok-control-btn w-10 h-10"
-            >
-              <List className="w-5 h-5" />
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <button 
+                onClick={() => setShowQualityMenu(!showQualityMenu)}
+                className="btn-icon bg-black/50"
+              >
+                <Settings className="w-4 h-4 text-white" />
+              </button>
+              
+              {showQualityMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowQualityMenu(false)} />
+                  <div className="absolute right-0 top-full mt-2 bg-card border border-border z-50 min-w-[140px]">
+                    <button
+                      onClick={() => { setSelectedQuality("auto"); setShowQualityMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm ${selectedQuality === "auto" ? 'text-primary' : 'text-foreground'} hover:bg-muted`}
+                    >
+                      Auto
+                    </button>
+                    {qualityOptions.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => { setSelectedQuality(option.id); setShowQualityMenu(false); }}
+                        className={`w-full px-4 py-2 text-left text-sm ${selectedQuality === option.id ? 'text-primary' : 'text-foreground'} hover:bg-muted`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <button onClick={onShowEpisodeList} className="btn-icon bg-black/50">
+              <List className="w-4 h-4 text-white" />
             </button>
+          </div>
+        </div>
+
+        <div className="tiktok-sidebar">
+          {currentEpisode > 1 && (
+            <button onClick={goToPrevEpisode} className="tiktok-action-btn">
+              <ChevronUp className="w-5 h-5" />
+            </button>
+          )}
+          
+          <button onClick={togglePlayPause} className="tiktok-action-btn">
+            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </button>
+          
+          <button onClick={toggleMute} className="tiktok-action-btn">
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </button>
+          
+          {currentEpisode < totalEpisodes && (
+            <button onClick={goToNextEpisode} className="tiktok-action-btn">
+              <ChevronDown className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="tiktok-info">
+          <p className="text-white text-sm">
+            <span className="text-white/60">Episode</span> {currentEpisode}
+          </p>
+        </div>
+
+        <div className="absolute bottom-12 left-4 right-4 z-30">
+          <div className="flex items-center gap-2 text-[10px] text-white/60 mb-1">
+            <span>{formatTime(progress)}</span>
+            <span>/</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+          <div 
+            className="h-1 bg-white/20 cursor-pointer"
+            onClick={handleSeek}
+          >
+            <div 
+              className="h-full bg-primary"
+              style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
+            />
           </div>
         </div>
       </div>
 
-      {/* Video Wrapper */}
-      <div className="tiktok-video-wrapper">
-        <video
-          ref={videoRef}
-          className="tiktok-video"
-          playsInline
-          autoPlay
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={handleVideoEnded}
-          onClick={togglePlayPause}
-        />
-
-        {/* Center Play/Pause Button */}
-        {!isPlaying && (
-          <button
-            onClick={togglePlayPause}
-            className="absolute inset-0 flex items-center justify-center z-20"
-          >
-            <div className="w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
-              <Play className="w-10 h-10 text-white ml-1" />
-            </div>
-          </button>
-        )}
+      <div className="tiktok-episode-indicator">
+        {Array.from({ length: Math.min(totalEpisodes, 10) }).map((_, i) => {
+          const epNum = i + 1;
+          return (
+            <div 
+              key={i}
+              className={`episode-dot ${currentEpisode === epNum ? 'active' : ''}`}
+            />
+          );
+        })}
+        {totalEpisodes > 10 && <span className="text-[10px] text-white/60">+{totalEpisodes - 10}</span>}
       </div>
-
-      {/* Info Overlay */}
-      <div className="tiktok-info safe-bottom">
-        <h2 className="text-lg font-bold mb-1 drop-shadow-lg">{title}</h2>
-        <p className="text-sm text-white/80 drop-shadow-lg">
-          Episode {currentEpisode} of {totalEpisodes}
-        </p>
-      </div>
-
-      {/* Side Controls */}
-      <div className="tiktok-controls safe-bottom">
-        <button
-          onClick={togglePlayPause}
-          className="tiktok-control-btn"
-        >
-          {isPlaying ? (
-            <Pause className="w-6 h-6" />
-          ) : (
-            <Play className="w-6 h-6 ml-1" />
-          )}
-        </button>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="tiktok-progress">
-        <div
-          className="tiktok-progress-bar"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* Swipe Indicators */}
-      {currentEpisode > 1 && (
-        <div className="swipe-indicator top">
-          ↑ Swipe up for previous episode
-        </div>
-      )}
-      {currentEpisode < totalEpisodes && (
-        <div className="swipe-indicator bottom">
-          ↓ Swipe down for next episode
-        </div>
-      )}
     </div>
   );
 }

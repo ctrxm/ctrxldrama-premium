@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { useRatings } from '@/hooks/useRatings';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -34,9 +32,9 @@ export function RatingStars({
   const [showForm, setShowForm] = useState(false);
 
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    sm: 'w-3.5 h-3.5',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5',
   };
 
   const displayRating = readOnly ? averageRating : (hoverRating || selectedRating || userRating?.rating || 0);
@@ -44,7 +42,7 @@ export function RatingStars({
   const handleRatingClick = (rating: number) => {
     if (readOnly) return;
     if (!user) {
-      toast.error('Silakan login terlebih dahulu');
+      toast.error('Please sign in first');
       return;
     }
     setSelectedRating(rating);
@@ -52,25 +50,25 @@ export function RatingStars({
       setShowForm(true);
     } else {
       submitRating({ rating }, {
-        onSuccess: () => toast.success('Rating berhasil disimpan'),
-        onError: () => toast.error('Gagal menyimpan rating'),
+        onSuccess: () => toast.success('Rating saved'),
+        onError: () => toast.error('Failed to save rating'),
       });
     }
   };
 
   const handleSubmitReview = () => {
     if (!selectedRating) {
-      toast.error('Pilih rating terlebih dahulu');
+      toast.error('Select a rating first');
       return;
     }
     submitRating(
       { rating: selectedRating, review: review || undefined },
       {
         onSuccess: () => {
-          toast.success('Ulasan berhasil disimpan');
+          toast.success('Review saved');
           setShowForm(false);
         },
-        onError: () => toast.error('Gagal menyimpan ulasan'),
+        onError: () => toast.error('Failed to save review'),
       }
     );
   };
@@ -97,43 +95,43 @@ export function RatingStars({
                   sizeClasses[size],
                   'transition-colors',
                   star <= displayRating
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-400'
+                    ? 'fill-primary text-primary'
+                    : 'text-muted-foreground'
                 )}
               />
             </button>
           ))}
         </div>
         {readOnly && (
-          <span className="text-sm text-muted-foreground">
-            {averageRating.toFixed(1)} ({totalRatings} ulasan)
+          <span className="text-xs text-muted-foreground">
+            {averageRating.toFixed(1)} ({totalRatings})
           </span>
         )}
       </div>
 
       {showReview && showForm && (
         <div className="flex flex-col gap-2 mt-2">
-          <Textarea
-            placeholder="Tulis ulasan Anda (opsional)..."
+          <textarea
+            placeholder="Write your review (optional)..."
             value={review}
             onChange={(e) => setReview(e.target.value)}
             rows={3}
+            className="input-base text-sm"
           />
           <div className="flex gap-2">
-            <Button
+            <button
               onClick={handleSubmitReview}
               disabled={isSubmitting}
-              size="sm"
+              className="btn-primary text-xs py-2"
             >
-              {isSubmitting ? 'Menyimpan...' : 'Simpan Ulasan'}
-            </Button>
-            <Button
-              variant="outline"
+              {isSubmitting ? 'Saving...' : 'Save Review'}
+            </button>
+            <button
               onClick={() => setShowForm(false)}
-              size="sm"
+              className="btn-secondary text-xs py-2"
             >
-              Batal
-            </Button>
+              Cancel
+            </button>
           </div>
         </div>
       )}

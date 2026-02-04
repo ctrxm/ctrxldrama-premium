@@ -1,13 +1,7 @@
 "use client";
 
-import { Share2, Facebook, Twitter, Link2, MessageCircle, Copy } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Share2, Copy, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -26,40 +20,34 @@ export function ShareButton({
   variant = 'icon',
   className,
 }: ShareButtonProps) {
+  const [showMenu, setShowMenu] = useState(false);
   const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
   const shareText = `${title}${description ? ` - ${description}` : ''}`;
-
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text: description,
-          url: shareUrl,
-        });
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          toast.error('Gagal membagikan');
-        }
-      }
-    }
-  };
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link disalin ke clipboard');
+      toast.success('Link copied');
+      setShowMenu(false);
     } catch {
-      toast.error('Gagal menyalin link');
+      toast.error('Failed to copy');
     }
   };
 
-  const shareToFacebook = () => {
+  const shareToWhatsApp = () => {
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-      '_blank',
-      'width=600,height=400'
+      `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`,
+      '_blank'
     );
+    setShowMenu(false);
+  };
+
+  const shareToTelegram = () => {
+    window.open(
+      `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      '_blank'
+    );
+    setShowMenu(false);
   };
 
   const shareToTwitter = () => {
@@ -68,63 +56,54 @@ export function ShareButton({
       '_blank',
       'width=600,height=400'
     );
+    setShowMenu(false);
   };
-
-  const shareToWhatsApp = () => {
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`,
-      '_blank'
-    );
-  };
-
-  const shareToTelegram = () => {
-    window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-      '_blank'
-    );
-  };
-
-  const triggerButton = variant === 'icon' ? (
-    <button
-      className={cn(
-        'p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors',
-        className
-      )}
-    >
-      <Share2 className="w-5 h-5 text-white" />
-    </button>
-  ) : (
-    <Button variant="outline" className={className}>
-      <Share2 className="w-4 h-4 mr-2" />
-      Bagikan
-    </Button>
-  );
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={handleCopyLink}>
-          <Copy className="w-4 h-4 mr-2" />
-          Salin Link
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareToWhatsApp}>
-          <MessageCircle className="w-4 h-4 mr-2" />
-          WhatsApp
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareToTelegram}>
-          <MessageCircle className="w-4 h-4 mr-2" />
-          Telegram
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareToFacebook}>
-          <Facebook className="w-4 h-4 mr-2" />
-          Facebook
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareToTwitter}>
-          <Twitter className="w-4 h-4 mr-2" />
-          Twitter / X
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="relative">
+      <button
+        onClick={() => setShowMenu(!showMenu)}
+        className={cn(
+          variant === 'icon' ? 'btn-icon bg-black/50' : 'btn-secondary gap-2',
+          className
+        )}
+      >
+        <Share2 className="w-4 h-4" />
+        {variant === 'button' && 'Share'}
+      </button>
+
+      {showMenu && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+          <div className="absolute right-0 top-full mt-2 bg-card border border-border z-50 min-w-[160px]">
+            <button
+              onClick={handleCopyLink}
+              className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4" />
+              Copy Link
+            </button>
+            <button
+              onClick={shareToWhatsApp}
+              className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
+            >
+              WhatsApp
+            </button>
+            <button
+              onClick={shareToTelegram}
+              className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
+            >
+              Telegram
+            </button>
+            <button
+              onClick={shareToTwitter}
+              className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
+            >
+              Twitter / X
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

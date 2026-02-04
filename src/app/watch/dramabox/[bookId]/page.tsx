@@ -5,23 +5,15 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useDramaDetail, useEpisodes } from "@/hooks/useDramaDetail";
 import { 
   ArrowLeft, ChevronUp, ChevronDown, Loader2, Settings, List, 
-  AlertCircle, Play, Pause, Volume2, VolumeX 
+  AlertCircle, Play, Pause, Volume2, VolumeX, X
 } from "lucide-react";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { DramaDetailDirect, DramaDetailResponseLegacy } from "@/types/drama";
 
-// Helper to check if response is new format
 function isDirectFormat(data: unknown): data is DramaDetailDirect {
   return data !== null && typeof data === 'object' && 'bookId' in data && 'coverWap' in data;
 }
 
-// Helper to check if response is legacy format
 function isLegacyFormat(data: unknown): data is DramaDetailResponseLegacy {
   return data !== null && typeof data === 'object' && 'data' in data && (data as DramaDetailResponseLegacy).data?.book !== undefined;
 }
@@ -34,6 +26,7 @@ export default function DramaBoxWatchPage() {
   const [currentEpisode, setCurrentEpisode] = useState(0);
   const [quality, setQuality] = useState(720);
   const [showEpisodeList, setShowEpisodeList] = useState(false);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -46,7 +39,6 @@ export default function DramaBoxWatchPage() {
   const { data: detailData, isLoading: detailLoading } = useDramaDetail(bookId || "");
   const { data: episodes, isLoading: episodesLoading } = useEpisodes(bookId || "");
 
-  // Initialize from URL params
   useEffect(() => {
     const ep = parseInt(searchParams.get("ep") || "0", 10);
     if (ep >= 0) {
@@ -54,7 +46,6 @@ export default function DramaBoxWatchPage() {
     }
   }, [searchParams]);
 
-  // Auto-hide controls
   const resetControlsTimeout = useCallback(() => {
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
@@ -65,7 +56,6 @@ export default function DramaBoxWatchPage() {
     }, 3000);
   }, []);
 
-  // Update URL when episode changes
   const handleEpisodeChange = (index: number) => {
     setCurrentEpisode(index);
     setShowEpisodeList(false);
@@ -84,7 +74,6 @@ export default function DramaBoxWatchPage() {
     }
   }, [currentEpisode, episodes]);
 
-  // All useMemo hooks must be called BEFORE any early returns
   const currentEpisodeData = useMemo(() => {
     if (!episodes) return null;
     return episodes[currentEpisode] || null;
@@ -106,7 +95,6 @@ export default function DramaBoxWatchPage() {
     return unique.sort((a, b) => b - a);
   }, [defaultCdn]);
 
-  // Keep selected quality valid for the current episode
   useEffect(() => {
     if (!availableQualities.length) return;
     if (!availableQualities.includes(quality)) {
@@ -114,7 +102,6 @@ export default function DramaBoxWatchPage() {
     }
   }, [availableQualities, quality]);
 
-  // Get video URL with selected quality
   const getVideoUrl = () => {
     if (!currentEpisodeData || !defaultCdn) return "";
 
@@ -160,7 +147,8 @@ export default function DramaBoxWatchPage() {
       }
       setIsPlaying(!isPlaying);
     }
-  }, [isPlaying]);
+    resetControlsTimeout();
+  }, [isPlaying, resetControlsTimeout]);
 
   const toggleMute = useCallback(() => {
     if (videoRef.current) {
@@ -169,15 +157,18 @@ export default function DramaBoxWatchPage() {
     }
   }, [isMuted]);
 
-  const handleSeek = useCallback((value: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = value;
-      setDisplayTime({ 
-        current: value, 
-        duration: videoRef.current.duration 
-      });
-    }
-  }, []);
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percent = x / rect.width;
+    const newTime = percent * displayTime.duration;
+    videoRef.current.currentTime = newTime;
+    setDisplayTime({ 
+      current: newTime, 
+      duration: videoRef.current.duration 
+    });
+  }, [displayTime.duration]);
 
   const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);
@@ -185,7 +176,6 @@ export default function DramaBoxWatchPage() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }, []);
 
-  // Handle both new and legacy API formats
   let book: { bookId: string; bookName: string; introduction?: string } | null = null;
 
   if (isDirectFormat(detailData)) {
@@ -204,37 +194,22 @@ export default function DramaBoxWatchPage() {
 
   const totalEpisodes = episodes?.length || 0;
 
-  // Loading state
   if (detailLoading || episodesLoading) {
     return (
-      <main className="fixed inset-0 bg-black flex flex-col items-center justify-center space-y-4">
-        <div className="relative">
-          <div className="w-20 h-20 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Play className="w-8 h-8 text-primary animate-pulse" />
-          </div>
-        </div>
-        <div className="text-center space-y-2">
-          <h3 className="text-white font-semibold text-lg">Loading video...</h3>
-          <p className="text-white/60 text-sm">Please wait a moment</p>
-        </div>
+      <main className="fixed inset-0 bg-background flex flex-col items-center justify-center">
+        <div className="loading-spinner mb-4" />
+        <p className="text-sm text-muted-foreground">Loading video...</p>
       </main>
     );
   }
 
-  // Error state
   if (!book || !episodes) {
     return (
-      <main className="fixed inset-0 bg-black flex flex-col items-center justify-center p-4">
-        <div className="w-24 h-24 rounded-full glass-strong flex items-center justify-center mb-6">
-          <AlertCircle className="w-12 h-12 text-destructive" />
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Drama not found</h2>
-        <p className="text-white/60 mb-6">The content you're looking for is unavailable</p>
-        <Link 
-          href="/" 
-          className="btn-premium"
-        >
+      <main className="fixed inset-0 bg-background flex flex-col items-center justify-center p-4">
+        <AlertCircle className="w-12 h-12 text-primary mb-4" />
+        <h2 className="text-xl font-display font-bold text-foreground mb-2">Not Found</h2>
+        <p className="text-muted-foreground mb-6 text-sm">Content unavailable</p>
+        <Link href="/" className="btn-primary">
           Back to Home
         </Link>
       </main>
@@ -250,13 +225,12 @@ export default function DramaBoxWatchPage() {
       onMouseMove={resetControlsTimeout}
       onTouchStart={resetControlsTimeout}
     >
-      {/* Video Player */}
       <div className="w-full h-full relative">
         {videoUrl ? (
           <video
             ref={videoRef}
             src={videoUrl}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             playsInline
             autoPlay
             preload="auto"
@@ -272,184 +246,150 @@ export default function DramaBoxWatchPage() {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <div className="loading-spinner" />
           </div>
         )}
 
-        {/* Controls Overlay */}
-        {showControls && (
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Top Bar */}
-            <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent safe-top pointer-events-auto">
-              <button 
-                onClick={() => router.back()}
-                className="p-2 sm:p-3 rounded-xl glass-strong hover:bg-white/20 transition-all duration-300"
-              >
-                <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </button>
-              
-              <div className="flex-1 text-center px-4">
-                <h1 className="text-white font-semibold text-sm sm:text-base line-clamp-1">
-                  {book.bookName}
-                </h1>
-                <p className="text-white/70 text-xs sm:text-sm">
-                  Episode {currentEpisode + 1} / {totalEpisodes}
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="p-2 sm:p-3 rounded-xl glass-strong hover:bg-white/20 transition-all duration-300">
-                      <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="glass-strong border-border/50">
-                    <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">Quality</div>
-                    {availableQualities.map((q) => (
-                      <DropdownMenuItem
-                        key={q}
-                        onClick={() => setQuality(q)}
-                        className={quality === q ? "text-primary font-semibold" : ""}
-                      >
-                        {q}p {quality === q && "✓"}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <button
-                  onClick={() => setShowEpisodeList(true)}
-                  className="p-2 sm:p-3 rounded-xl glass-strong hover:bg-white/20 transition-all duration-300"
-                >
-                  <List className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </button>
-              </div>
+        {!isPlaying && showControls && (
+          <button
+            onClick={togglePlay}
+            className="absolute inset-0 flex items-center justify-center z-20"
+          >
+            <div className="w-16 h-16 bg-black/60 flex items-center justify-center">
+              <Play className="w-8 h-8 text-white fill-white" />
             </div>
+          </button>
+        )}
 
-            {/* Center Play/Pause Button */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <button
-                onClick={togglePlay}
-                className="pointer-events-auto p-6 sm:p-8 rounded-full glass-strong hover:scale-110 transition-all duration-300"
-              >
-                {isPlaying ? (
-                  <Pause className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white" />
-                ) : (
-                  <Play className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white ml-1" />
-                )}
-              </button>
+        <div className={`absolute inset-0 pointer-events-none transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent safe-top pointer-events-auto">
+            <button 
+              onClick={() => router.back()}
+              className="btn-icon bg-black/50"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            
+            <div className="flex-1 text-center px-4">
+              <h1 className="text-white font-medium text-sm line-clamp-1">
+                {book.bookName}
+              </h1>
+              <p className="text-white/60 text-xs">
+                EP {currentEpisode + 1} / {totalEpisodes}
+              </p>
             </div>
-
-            {/* Side Navigation */}
-            <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 flex flex-col gap-3 sm:gap-4 pointer-events-auto">
-              {currentEpisode > 0 && (
-                <button
-                  onClick={goToPrevEpisode}
-                  className="p-3 sm:p-4 rounded-full glass-strong hover:bg-white/20 transition-all duration-300"
+            
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowQualityMenu(!showQualityMenu)}
+                  className="btn-icon bg-black/50"
                 >
-                  <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <Settings className="w-4 h-4 text-white" />
                 </button>
-              )}
-              
-              {currentEpisode < totalEpisodes - 1 && (
-                <button
-                  onClick={goToNextEpisode}
-                  className="p-3 sm:p-4 rounded-full glass-strong hover:bg-white/20 transition-all duration-300"
-                >
-                  <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </button>
-              )}
-            </div>
-
-            {/* Bottom Controls */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-black/80 to-transparent safe-bottom pointer-events-auto">
-              <div className="space-y-3 sm:space-y-4">
-                {/* Episode Info */}
-                <div className="space-y-1">
-                  <h2 className="text-white font-semibold text-sm sm:text-base">
-                    {currentEpisodeData?.chapterName || `Episode ${currentEpisode + 1}`}
-                  </h2>
-                  {book.introduction && (
-                    <p className="text-white/80 text-xs sm:text-sm line-clamp-2">
-                      {book.introduction}
-                    </p>
-                  )}
-                </div>
-
-                {/* Progress Bar */}
-                <div className="flex items-center gap-3">
-                  <span className="text-white/80 text-xs sm:text-sm tabular-nums">
-                    {formatTime(displayTime.current)}
-                  </span>
-                  <div 
-                    className="flex-1 h-1 sm:h-1.5 bg-white/20 rounded-full cursor-pointer relative group"
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const percent = x / rect.width;
-                      const newTime = percent * displayTime.duration;
-                      handleSeek(newTime);
-                    }}
-                  >
-                    <div 
-                      className="h-full bg-primary rounded-full relative transition-all duration-150"
-                      style={{ width: `${displayTime.duration ? (displayTime.current / displayTime.duration) * 100 : 0}%` }}
-                    >
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full shadow-lg" />
+                
+                {showQualityMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowQualityMenu(false)} />
+                    <div className="absolute right-0 top-full mt-2 bg-card border border-border z-50 min-w-[100px]">
+                      {availableQualities.map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => { setQuality(q); setShowQualityMenu(false); }}
+                          className={`w-full px-4 py-2 text-left text-sm ${quality === q ? 'text-primary' : 'text-foreground'} hover:bg-muted`}
+                        >
+                          {q}p
+                        </button>
+                      ))}
                     </div>
-                  </div>
-                  <span className="text-white/80 text-xs sm:text-sm tabular-nums">
-                    {formatTime(displayTime.duration)}
-                  </span>
-                  <button
-                    onClick={toggleMute}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-5 h-5 text-white" />
-                    ) : (
-                      <Volume2 className="w-5 h-5 text-white" />
-                    )}
-                  </button>
+                  </>
+                )}
+              </div>
+
+              <button
+                onClick={() => setShowEpisodeList(true)}
+                className="btn-icon bg-black/50"
+              >
+                <List className="w-4 h-4 text-white" />
+              </button>
+            </div>
+          </div>
+
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 pointer-events-auto">
+            {currentEpisode > 0 && (
+              <button
+                onClick={goToPrevEpisode}
+                className="btn-icon bg-black/50"
+              >
+                <ChevronUp className="w-5 h-5 text-white" />
+              </button>
+            )}
+            
+            <button onClick={togglePlay} className="btn-icon bg-black/50">
+              {isPlaying ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white" />}
+            </button>
+            
+            <button onClick={toggleMute} className="btn-icon bg-black/50">
+              {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
+            </button>
+            
+            {currentEpisode < totalEpisodes - 1 && (
+              <button
+                onClick={goToNextEpisode}
+                className="btn-icon bg-black/50"
+              >
+                <ChevronDown className="w-5 h-5 text-white" />
+              </button>
+            )}
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent safe-bottom pointer-events-auto">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs text-white/60">
+                <span className="tabular-nums">{formatTime(displayTime.current)}</span>
+                <div 
+                  className="flex-1 h-1 bg-white/20 cursor-pointer"
+                  onClick={handleSeek}
+                >
+                  <div 
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${displayTime.duration ? (displayTime.current / displayTime.duration) * 100 : 0}%` }}
+                  />
                 </div>
+                <span className="tabular-nums">{formatTime(displayTime.duration)}</span>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Episode List Drawer */}
       {showEpisodeList && (
         <>
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/80 z-50"
             onClick={() => setShowEpisodeList(false)}
           />
-          <div className="fixed bottom-0 left-0 right-0 max-h-[70vh] glass-premium rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom">
-            <div className="p-4 sm:p-6 border-b border-border/50 flex items-center justify-between">
-              <h2 className="font-bold text-xl text-foreground">
-                Episodes ({totalEpisodes})
-              </h2>
+          <div className="fixed bottom-0 left-0 right-0 max-h-[70vh] bg-card border-t border-border z-50 overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <span className="text-label">Episodes ({totalEpisodes})</span>
               <button
                 onClick={() => setShowEpisodeList(false)}
-                className="px-4 py-2 rounded-lg glass-strong hover:bg-white/10 transition-colors text-sm font-medium"
+                className="btn-icon"
               >
-                Close
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(70vh-80px)] custom-scrollbar">
-              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2 sm:gap-3">
+            <div className="p-4 overflow-y-auto max-h-[calc(70vh-60px)] scrollbar-thin">
+              <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1">
                 {episodes.map((ep, idx) => (
                   <button
                     key={ep.chapterId}
                     onClick={() => handleEpisodeChange(idx)}
                     className={`
-                      aspect-square rounded-xl font-semibold text-sm sm:text-base
-                      transition-all duration-300
+                      aspect-square flex items-center justify-center text-sm font-medium transition-colors
                       ${idx === currentEpisode
-                        ? 'bg-gradient-to-br from-primary to-accent text-white shadow-lg shadow-primary/30 scale-105' 
-                        : 'glass-strong hover:bg-white/10 text-foreground'
+                        ? 'bg-primary text-white' 
+                        : 'bg-muted hover:bg-muted/70 text-foreground'
                       }
                     `}
                   >

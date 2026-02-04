@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Search, X, Play, Sparkles } from "lucide-react";
-import Image from "next/image";
+import { Search, X, Heart, Clock, Bell } from "lucide-react";
 import { useSearchDramas } from "@/hooks/useDramas";
 import { useReelShortSearch } from "@/hooks/useReelShort";
 import { useNetShortSearch } from "@/hooks/useNetShort";
@@ -14,8 +13,6 @@ import { useFreeReelsSearch } from "@/hooks/useFreeReels";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import { User, LogOut, Heart, History } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 
 export function Header() {
@@ -25,10 +22,8 @@ export function Header() {
   const debouncedQuery = useDebounce(searchQuery, 300);
   const normalizedQuery = debouncedQuery.trim();
 
-  // Platform context
   const { isDramaBox, isReelShort, isNetShort, isMelolo, isFlickReels, isFreeReels, platformInfo } = usePlatform();
 
-  // Search based on platform
   const { data: dramaBoxResults, isLoading: isSearchingDramaBox } = useSearchDramas(
     isDramaBox ? normalizedQuery : ""
   );
@@ -60,7 +55,6 @@ export function Header() {
             ? isSearchingFlickReels
             : isSearchingFreeReels;
 
-  // Search results processing
   const searchResults = isDramaBox 
     ? dramaBoxResults 
     : isReelShort 
@@ -79,319 +73,245 @@ export function Header() {
     setSearchQuery("");
   };
 
-  // Hide header on watch pages for immersive video experience
   if (pathname?.startsWith("/watch")) {
     return null;
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
-      <div className="container-corporate">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 group-hover:scale-105 transition-transform">
-              <Image
-                src="/logo.png"
-                alt="CTRXLDrama"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-lg text-foreground tracking-tight">
-                CTRXLDrama
-              </span>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
-                Premium Streaming
-              </span>
-            </div>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+      <div className="container-main">
+        <div className="flex items-center justify-between h-14">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl font-display font-bold tracking-tight text-foreground">
+              CTRXL
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-primary px-2 py-0.5 border border-primary">
+              Drama
+            </span>
           </Link>
 
-          {/* Search Button */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="px-5 py-2.5 rounded-lg bg-secondary border border-border hover:border-primary/50 transition-all flex items-center gap-2.5"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <span className="hidden sm:inline text-sm text-muted-foreground">
-              Search dramas...
-            </span>
-          </button>
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/" className={`nav-item ${pathname === '/' ? 'active' : ''}`}>
+              Home
+            </Link>
+            <Link href="/browse" className={`nav-item ${pathname === '/browse' ? 'active' : ''}`}>
+              Browse
+            </Link>
+            <Link href="/favorites" className={`nav-item ${pathname === '/favorites' ? 'active' : ''}`}>
+              Library
+            </Link>
+          </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/favorites"
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
-              title="Favorit"
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="btn-icon"
+              aria-label="Search"
             >
-              <Heart className="w-5 h-5 text-muted-foreground" />
+              <Search className="w-4 h-4" />
+            </button>
+            
+            <Link href="/favorites" className="btn-icon md:hidden">
+              <Heart className="w-4 h-4" />
             </Link>
-            <Link
-              href="/history"
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
-              title="Riwayat"
-            >
-              <History className="w-5 h-5 text-muted-foreground" />
+            
+            <Link href="/history" className="btn-icon">
+              <Clock className="w-4 h-4" />
             </Link>
+            
             <NotificationBell />
           </div>
         </div>
       </div>
 
-      {/* Search Overlay (Portal) */}
       {searchOpen &&
         typeof document !== "undefined" &&
         createPortal(
-          <div className="fixed inset-0 bg-background/98 backdrop-blur-sm z-[9999] overflow-hidden">
-            <div className="container-corporate py-6 h-[100dvh] flex flex-col">
-              {/* Search Header */}
-              <div className="flex items-center gap-3 mb-6 flex-shrink-0">
-                <div className="flex-1 relative min-w-0">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
+          <div className="fixed inset-0 bg-background z-[9999] overflow-hidden">
+            <div className="container-main py-4 h-[100dvh] flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={`Search in ${platformInfo.name}...`}
-                    className="search-input pl-12"
+                    className="input-base pl-11"
                     autoFocus
                   />
                 </div>
                 <button
                   onClick={handleSearchClose}
-                  className="p-3 rounded-lg bg-secondary hover:bg-destructive/20 hover:text-destructive transition-all flex-shrink-0"
+                  className="btn-icon"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Platform indicator */}
-              <div className="mb-5 flex items-center gap-2.5 text-sm">
-                <span className="text-muted-foreground">Searching in:</span>
-                <div className="px-3.5 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  {platformInfo.name}
-                </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-label">Platform</span>
+                <span className="badge-count">{platformInfo.name}</span>
               </div>
 
-              {/* Search Results */}
-              <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+              <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
                 {isSearching && normalizedQuery && (
                   <div className="flex items-center justify-center py-20">
-                    <div className="w-12 h-12 border-4 border-border border-t-primary rounded-full animate-spin" />
+                    <div className="loading-spinner" />
                   </div>
                 )}
 
                 {!isSearching && normalizedQuery && searchResults && searchResults.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
-                      <Search className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">No results found</h3>
-                    <p className="text-muted-foreground">Try searching with different keywords</p>
+                    <Search className="w-10 h-10 text-muted-foreground mb-4" />
+                    <p className="text-sm text-muted-foreground">No results found</p>
                   </div>
                 )}
 
-                {/* DramaBox Results */}
                 {isDramaBox && searchResults && searchResults.length > 0 && (
-                  <div className="grid gap-3">
+                  <div className="divide-y divide-border">
                     {searchResults.map((drama: any) => (
                       <Link
                         key={drama.bookId}
                         href={`/detail/dramabox/${drama.bookId}`}
                         onClick={handleSearchClose}
-                        className="card-corporate p-4 flex gap-4 hover:scale-[1.01] transition-all"
+                        className="flex gap-4 py-4 hover:bg-card transition-colors"
                       >
-                        <div className="relative flex-shrink-0">
-                          <img
-                            src={drama.cover}
-                            alt={drama.bookName}
-                            className="w-16 h-24 object-cover rounded-lg"
-                            loading="lazy"
-                            referrerPolicy="no-referrer"
-                          />
-                          {drama.isVip && (
-                            <div className="absolute -top-1.5 -right-1.5">
-                              <Sparkles className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                            </div>
-                          )}
-                        </div>
+                        <img
+                          src={drama.cover}
+                          alt={drama.bookName}
+                          className="w-14 h-20 object-cover flex-shrink-0"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base text-foreground line-clamp-1 mb-1">{drama.bookName}</h3>
-                          {drama.protagonist && (
-                            <p className="text-sm text-primary font-medium mb-2">{drama.protagonist}</p>
-                          )}
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {drama.introduction}
-                          </p>
-                          {drama.tagNames && (
-                            <div className="flex flex-wrap gap-1.5">
-                              {drama.tagNames.slice(0, 3).map((tag: string) => (
-                                <span key={tag} className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-secondary border border-border">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          <h3 className="font-semibold text-sm text-foreground line-clamp-1 mb-1">{drama.bookName}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{drama.introduction}</p>
                         </div>
                       </Link>
                     ))}
                   </div>
                 )}
 
-                {/* ReelShort Results */}
                 {isReelShort && searchResults && searchResults.length > 0 && (
-                  <div className="grid gap-3">
+                  <div className="divide-y divide-border">
                     {searchResults.map((book: any) => (
                       <Link
                         key={book.book_id}
                         href={`/detail/reelshort/${book.book_id}`}
                         onClick={handleSearchClose}
-                        className="card-corporate p-4 flex gap-4 hover:scale-[1.01] transition-all"
+                        className="flex gap-4 py-4 hover:bg-card transition-colors"
                       >
                         <img
                           src={book.cover_url}
                           alt={book.name}
-                          className="w-16 h-24 object-cover rounded-lg flex-shrink-0"
+                          className="w-14 h-20 object-cover flex-shrink-0"
                           loading="lazy"
                           referrerPolicy="no-referrer"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base line-clamp-1 mb-1">{book.name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {book.introduction}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{book.episode_count} episodes</span>
-                          </div>
+                          <h3 className="font-semibold text-sm text-foreground line-clamp-1 mb-1">{book.name}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{book.introduction}</p>
                         </div>
                       </Link>
                     ))}
                   </div>
                 )}
 
-                {/* NetShort Results */}
                 {isNetShort && searchResults && searchResults.length > 0 && (
-                  <div className="grid gap-3">
+                  <div className="divide-y divide-border">
                     {searchResults.map((item: any) => (
                       <Link
                         key={item.short_play_id}
                         href={`/detail/netshort/${item.short_play_id}`}
                         onClick={handleSearchClose}
-                        className="card-corporate p-4 flex gap-4 hover:scale-[1.01] transition-all"
+                        className="flex gap-4 py-4 hover:bg-card transition-colors"
                       >
                         <img
                           src={item.cover}
                           alt={item.title}
-                          className="w-16 h-24 object-cover rounded-lg flex-shrink-0"
+                          className="w-14 h-20 object-cover flex-shrink-0"
                           loading="lazy"
                           referrerPolicy="no-referrer"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base line-clamp-1 mb-1">{item.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {item.introduction}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{item.total_episode} episodes</span>
-                          </div>
+                          <h3 className="font-semibold text-sm text-foreground line-clamp-1 mb-1">{item.title}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{item.introduction}</p>
                         </div>
                       </Link>
                     ))}
                   </div>
                 )}
 
-                {/* Melolo Results */}
                 {isMelolo && searchResults && searchResults.length > 0 && (
-                  <div className="grid gap-3">
+                  <div className="divide-y divide-border">
                     {searchResults.map((book: any) => (
                       <Link
                         key={book.book_id}
                         href={`/detail/melolo/${book.book_id}`}
                         onClick={handleSearchClose}
-                        className="card-corporate p-4 flex gap-4 hover:scale-[1.01] transition-all"
+                        className="flex gap-4 py-4 hover:bg-card transition-colors"
                       >
                         <img
                           src={book.thumb_url}
                           alt={book.book_name}
-                          className="w-16 h-24 object-cover rounded-lg flex-shrink-0"
+                          className="w-14 h-20 object-cover flex-shrink-0"
                           loading="lazy"
                           referrerPolicy="no-referrer"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base line-clamp-1 mb-1">{book.book_name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {book.introduction}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{book.episode_count} episodes</span>
-                          </div>
+                          <h3 className="font-semibold text-sm text-foreground line-clamp-1 mb-1">{book.book_name}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{book.introduction}</p>
                         </div>
                       </Link>
                     ))}
                   </div>
                 )}
 
-                {/* FlickReels Results */}
                 {isFlickReels && searchResults && searchResults.length > 0 && (
-                  <div className="grid gap-3">
+                  <div className="divide-y divide-border">
                     {searchResults.map((book: any) => (
                       <Link
                         key={book.book_id}
                         href={`/detail/flickreels/${book.book_id}`}
                         onClick={handleSearchClose}
-                        className="card-corporate p-4 flex gap-4 hover:scale-[1.01] transition-all"
+                        className="flex gap-4 py-4 hover:bg-card transition-colors"
                       >
                         <img
                           src={book.cover_url}
                           alt={book.name}
-                          className="w-16 h-24 object-cover rounded-lg flex-shrink-0"
+                          className="w-14 h-20 object-cover flex-shrink-0"
                           loading="lazy"
                           referrerPolicy="no-referrer"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base line-clamp-1 mb-1">{book.name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {book.introduction}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{book.episode_count} episodes</span>
-                          </div>
+                          <h3 className="font-semibold text-sm text-foreground line-clamp-1 mb-1">{book.name}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{book.introduction}</p>
                         </div>
                       </Link>
                     ))}
                   </div>
                 )}
 
-                {/* FreeReels Results */}
                 {isFreeReels && searchResults && searchResults.length > 0 && (
-                  <div className="grid gap-3">
+                  <div className="divide-y divide-border">
                     {searchResults.map((book: any) => (
                       <Link
                         key={book.bookId}
                         href={`/detail/freereels/${book.bookId}`}
                         onClick={handleSearchClose}
-                        className="card-corporate p-4 flex gap-4 hover:scale-[1.01] transition-all"
+                        className="flex gap-4 py-4 hover:bg-card transition-colors"
                       >
                         <img
                           src={book.cover}
                           alt={book.bookName}
-                          className="w-16 h-24 object-cover rounded-lg flex-shrink-0"
+                          className="w-14 h-20 object-cover flex-shrink-0"
                           loading="lazy"
                           referrerPolicy="no-referrer"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base line-clamp-1 mb-1">{book.bookName}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {book.introduction}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{book.episodeCount} episodes</span>
-                          </div>
+                          <h3 className="font-semibold text-sm text-foreground line-clamp-1 mb-1">{book.bookName}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{book.introduction}</p>
                         </div>
                       </Link>
                     ))}
@@ -405,5 +325,3 @@ export function Header() {
     </header>
   );
 }
-
-

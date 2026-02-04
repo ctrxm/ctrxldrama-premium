@@ -1,46 +1,64 @@
 # CTRXLDrama Premium
 
 ## Overview
-A premium streaming platform built with Next.js 16, featuring a corporate UI with glassmorphism design and an enhanced video player. The app aggregates drama content from multiple sources (DramaBox, ReelShort, NetShort, Melolo, FlickReels, FreeReels).
+A premium streaming platform built with Next.js 16, featuring a corporate editorial UI design with flat aesthetics and an enhanced TikTok-style video player. The app aggregates drama content from multiple sources (DramaBox, ReelShort, NetShort, Melolo, FlickReels, FreeReels).
+
+## Design Philosophy
+- **Aesthetic**: Corporate editorial/magazine style - clean, minimal, no "AI-detected" looks
+- **Color Palette**: Monochrome (black/white) with red accent (hsl 0, 72%, 51%)
+- **Typography**: DM Sans (body) + Space Grotesk (headings)
+- **Layout**: Grid-based with 1px dividers, zero border radius
+- **Effects**: No gradients, no glassmorphism, minimal shadows, flat design
 
 ## Project Architecture
 
 ### Tech Stack
 - **Framework**: Next.js 16.1.6 with App Router (Turbopack)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS with custom animations
-- **UI Components**: Radix UI primitives with shadcn/ui patterns
+- **Styling**: Tailwind CSS with custom utility classes
+- **UI Components**: Custom components with corporate design system
 - **State Management**: Zustand + TanStack React Query
 - **Backend Integration**: Supabase (authentication + database)
-- **Video Player**: HLS.js for streaming
+- **Video Player**: HLS.js for streaming with TikTok-style auto-scroll
 
 ### Directory Structure
 ```
 src/
 ├── app/           # Next.js App Router pages
-│   ├── favorites/ # Favorites page
+│   ├── favorites/ # Favorites/Library page
 │   ├── history/   # Watch history page
-│   └── detail/    # Drama detail pages
+│   ├── detail/    # Drama detail pages
+│   ├── watch/     # Video player pages
+│   └── login/     # Authentication pages
 ├── components/    # React components (UI + feature components)
 ├── contexts/      # React context providers
 ├── hooks/         # Custom React hooks (data fetching, utilities)
 ├── lib/           # Utility functions, API clients, Supabase config
-├── styles/        # Additional CSS
+├── styles/        # Global CSS with design system
 └── types/         # TypeScript type definitions
 ```
 
-### New Features (2026-02-04)
+### Key Components
+- **Header** - Minimal header with CTRXL DRAMA branding
+- **PlatformSelector** - Tab-based platform switching
+- **BottomNav** - Mobile navigation bar
+- **UnifiedMediaCard** - Grid-based drama cards
+- **TikTokPlayer** - Vertical video player with auto-scroll
+- **FavoritesList** - Library management
+- **WatchHistoryList** - Continue watching tracking
+
+### Features
 1. **Favorites/Watchlist** - Save dramas to favorites list
 2. **Watch History** - Track watched episodes with resume playback
 3. **Rating & Reviews** - Rate dramas with 1-5 stars and write reviews
 4. **Comments** - Comment on dramas and episodes with replies
 5. **Notifications** - Get notified when new episodes are released
-6. **Share** - Share dramas to social media (WhatsApp, Telegram, Facebook, Twitter)
+6. **Share** - Share dramas to social media (WhatsApp, Telegram, Twitter)
 7. **Trending** - View trending dramas based on views and favorites
 8. **Recommendations** - Personalized recommendations based on watch history
 
 ### Database Schema
-New tables added in `supabase-features-schema.sql`:
+Tables in `supabase-features-schema.sql`:
 - `favorites` - User favorite dramas
 - `watch_history` - Watch progress tracking
 - `ratings` - User ratings and reviews
@@ -91,6 +109,13 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-04: Complete UI redesign to corporate editorial style
+  - Updated color scheme to monochrome with red accent
+  - Changed typography to DM Sans + Space Grotesk
+  - Removed all gradients and glassmorphism effects
+  - Redesigned Header, BottomNav, cards, buttons, forms
+  - Updated all pages with consistent flat design
+  - Created custom CSS utility classes for design system
 - 2026-02-04: Added new user engagement features
   - Favorites/Watchlist system
   - Watch history with resume playback
@@ -99,9 +124,6 @@ npm run deploy:cloudflare
   - Social media sharing
   - Notification system for new episodes
   - Trending and recommendations sections
-  - Updated Header with notification bell
-  - Created favorites and history pages
 - 2026-02-04: Initial Replit setup
   - Configured Next.js to allow Replit dev origins
-  - Fixed JSX syntax error in InfiniteDramaSection.tsx
   - Set up development workflow on port 5000

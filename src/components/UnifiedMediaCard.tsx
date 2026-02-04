@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Play, Sparkles } from "lucide-react";
+import { Play } from "lucide-react";
 
 export interface BadgeConfig {
   text: string;
@@ -30,88 +30,49 @@ export function UnifiedMediaCard({
   topRightBadge,
   index = 0,
 }: UnifiedMediaCardProps) {
-  
-  const BADGE_BASE = "px-2.5 py-1 rounded-md font-bold text-white shadow-sm leading-none tracking-wide flex items-center gap-1 font-sans text-[10px] uppercase";
-
   return (
-    <Link
-      href={link}
-      className="group relative block"
-    >
-      {/* Visual Container */}
-      <div className="card-corporate aspect-[2/3] relative overflow-hidden">
+    <Link href={link} className="group block">
+      <div className="card-interactive aspect-poster relative overflow-hidden">
         <img
           src={cover.includes(".heic") 
             ? `https://wsrv.nl/?url=${encodeURIComponent(cover)}&output=jpg` 
             : cover}
           alt={title}
-          className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover"
           loading="lazy"
           referrerPolicy="no-referrer"
         />
 
-        {/* Flat Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-        {/* Badges Container */}
-        <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none z-10 gap-2">
-          
-          {/* Top Left Badge */}
-          <div className="flex-1 min-w-0 flex justify-start"> 
-            {topLeftBadge && (
-              <div 
-                className={`
-                  ${BADGE_BASE} truncate max-w-full
-                  ${topLeftBadge.isPremium ? 'badge-premium' : ''}
-                `}
-                style={!topLeftBadge.isPremium ? { 
-                  backgroundColor: topLeftBadge.color || "#DC2626",
-                  color: topLeftBadge.textColor || "#FFFFFF"
-                } : {}}
-              >
-                {topLeftBadge.isPremium && <Sparkles className="w-3 h-3 fill-current" />}
-                {topLeftBadge.text}
-              </div>
-            )}
-          </div>
-
-          {/* Top Right Badge */}
-          <div className="shrink-0 flex justify-end">
-            {topRightBadge && (
-              <div 
-                className={`${BADGE_BASE}`}
-                style={{ 
-                  backgroundColor: topRightBadge.isTransparent 
-                    ? "rgba(0, 0, 0, 0.6)" 
-                    : (topRightBadge.color || "rgba(0, 0, 0, 0.6)"),
-                  color: topRightBadge.textColor || "#FFFFFF"
-                }}
-              >
-                {topRightBadge.text}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Episode Count Badge */}
-        {episodes > 0 && (
-          <div className="absolute bottom-2 left-2 episode-badge pointer-events-none">
-            <Play className="w-3.5 h-3.5 fill-primary text-primary" />
-            <span className="font-semibold">{episodes} Episodes</span>
+        {topLeftBadge && (
+          <div className="absolute top-0 left-0">
+            <div 
+              className={topLeftBadge.isPremium ? "badge-live" : "badge-new"}
+            >
+              {topLeftBadge.text}
+            </div>
           </div>
         )}
 
-        {/* Center Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-lg">
-            <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+        {episodes > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black/80 px-2 py-1.5">
+            <div className="flex items-center gap-1.5">
+              <Play className="w-3 h-3 text-primary fill-primary" />
+              <span className="text-[10px] font-medium text-white uppercase tracking-wider">
+                {episodes} EP
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-12 h-12 bg-primary flex items-center justify-center">
+            <Play className="w-5 h-5 text-white fill-white" />
           </div>
         </div>
       </div>
 
-      {/* Title */}
-      <div className="pt-3 pb-1">
-        <h3 className="font-bold text-sm leading-snug line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+      <div className="mt-2">
+        <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
           {title}
         </h3>
       </div>

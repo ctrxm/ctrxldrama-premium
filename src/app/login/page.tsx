@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -31,22 +30,27 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to your account</p>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-2xl font-display font-bold tracking-tight">CTRXL</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-primary px-2 py-0.5 border border-primary">
+              Drama
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
-        <div className="card-corporate p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="border border-border p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+              <div className="p-3 bg-primary/10 border border-primary/20 text-primary text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
+              <label htmlFor="email" className="text-label block mb-2">
                 Email
               </label>
               <input
@@ -55,13 +59,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="search-input"
+                className="input-base"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
+              <label htmlFor="password" className="text-label block mb-2">
                 Password
               </label>
               <input
@@ -70,7 +74,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="search-input"
+                className="input-base"
                 placeholder="••••••••"
               />
             </div>
@@ -78,17 +82,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-corporate w-full flex items-center justify-center gap-2"
+              className="btn-primary w-full"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
+            <span className="text-muted-foreground">No account? </span>
             <Link href="/register" className="text-primary hover:underline font-medium">
-              Sign up
+              Create one
             </Link>
           </div>
         </div>

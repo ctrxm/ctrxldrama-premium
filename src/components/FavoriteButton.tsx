@@ -1,7 +1,6 @@
 "use client";
 
 import { Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -36,7 +35,7 @@ export function FavoriteButton({
     e.stopPropagation();
 
     if (!user) {
-      toast.error('Silakan login terlebih dahulu');
+      toast.error('Please sign in first');
       return;
     }
 
@@ -48,9 +47,9 @@ export function FavoriteButton({
         drama_cover,
         drama_genre,
       });
-      toast.success(isFav ? 'Dihapus dari favorit' : 'Ditambahkan ke favorit');
+      toast.success(isFav ? 'Removed from favorites' : 'Added to favorites');
     } catch {
-      toast.error('Gagal memperbarui favorit');
+      toast.error('Failed to update favorites');
     }
   };
 
@@ -60,14 +59,14 @@ export function FavoriteButton({
         onClick={handleClick}
         disabled={isToggling}
         className={cn(
-          'p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors',
+          'btn-icon bg-black/50',
           className
         )}
       >
         <Heart
           className={cn(
-            'w-5 h-5 transition-colors',
-            isFav ? 'fill-red-500 text-red-500' : 'text-white'
+            'w-4 h-4 transition-colors',
+            isFav ? 'fill-primary text-primary' : 'text-white'
           )}
         />
       </button>
@@ -75,16 +74,17 @@ export function FavoriteButton({
   }
 
   return (
-    <Button
+    <button
       onClick={handleClick}
       disabled={isToggling}
-      variant={isFav ? 'default' : 'outline'}
-      className={className}
+      className={cn(
+        isFav ? 'btn-primary' : 'btn-secondary',
+        'gap-2',
+        className
+      )}
     >
-      <Heart
-        className={cn('w-4 h-4 mr-2', isFav && 'fill-current')}
-      />
-      {isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
-    </Button>
+      <Heart className={cn('w-4 h-4', isFav && 'fill-current')} />
+      {isFav ? 'Remove' : 'Favorite'}
+    </button>
   );
 }

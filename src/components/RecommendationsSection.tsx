@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Star, Loader2 } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { useRecommendations } from '@/hooks/useTrending';
 import { useAuth } from '@/contexts/AuthContext';
 import { FavoriteButton } from '@/components/FavoriteButton';
@@ -21,61 +21,74 @@ export function RecommendationsSection({ className, limit = 10 }: Recommendation
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
+      <section>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-3 w-32 skeleton-base" />
+          <div className="flex-1 divider" />
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-px bg-border">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="bg-background p-2">
+              <div className="aspect-poster skeleton-base" />
+              <div className="mt-2 space-y-1.5">
+                <div className="h-3.5 skeleton-base" />
+                <div className="h-3.5 skeleton-base w-2/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     );
   }
 
   if (!displayedRecs?.length) return null;
 
   return (
-    <div className={cn('space-y-4', className)}>
-      <div className="flex items-center gap-2">
-        <Sparkles className="w-5 h-5 text-purple-500" />
-        <h2 className="text-xl font-bold">
-          {user ? 'Rekomendasi Untuk Anda' : 'Drama Populer'}
+    <section className={cn('', className)}>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="section-title">
+          {user ? 'Recommended For You' : 'Popular Dramas'}
         </h2>
+        <div className="flex-1 divider" />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-px bg-border">
         {displayedRecs.map((drama) => (
           <div
             key={`${drama.drama_id}-${drama.platform}`}
-            className="relative group rounded-xl overflow-hidden bg-card"
+            className="relative group bg-background p-2"
           >
             <Link href={`/drama/${drama.platform}/${drama.drama_id}`}>
-              <div className="aspect-[2/3] relative">
+              <div className="card-interactive aspect-poster relative overflow-hidden">
                 {drama.drama_cover ? (
                   <Image
                     src={drama.drama_cover}
                     alt={drama.drama_title}
                     fill
-                    className="object-cover transition-transform group-hover:scale-105"
+                    className="object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-muted-foreground" />
+                  <div className="w-full h-full bg-muted" />
+                )}
+
+                {drama.avg_rating > 0 && (
+                  <div className="absolute top-0 left-0 bg-black/80 px-2 py-1 flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-primary text-primary" />
+                    <span className="text-[10px] font-semibold text-white">
+                      {drama.avg_rating.toFixed(1)}
+                    </span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-white font-semibold line-clamp-2 mb-1">
-                    {drama.drama_title}
+              </div>
+              <div className="mt-2">
+                <p className="text-sm font-medium line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                  {drama.drama_title}
+                </p>
+                {drama.drama_genre && (
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
+                    {drama.drama_genre}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-white/80">
-                    {drama.avg_rating > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        {drama.avg_rating.toFixed(1)}
-                      </span>
-                    )}
-                    {drama.drama_genre && (
-                      <span className="truncate">{drama.drama_genre}</span>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
             </Link>
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -90,6 +103,6 @@ export function RecommendationsSection({ className, limit = 10 }: Recommendation
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
