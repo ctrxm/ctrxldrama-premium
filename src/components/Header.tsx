@@ -15,7 +15,8 @@ import { usePlatform } from "@/hooks/usePlatform";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Heart, History } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function Header() {
   const pathname = usePathname();
@@ -120,7 +121,24 @@ export function Header() {
             </span>
           </button>
 
-
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/favorites"
+              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              title="Favorit"
+            >
+              <Heart className="w-5 h-5 text-muted-foreground" />
+            </Link>
+            <Link
+              href="/history"
+              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              title="Riwayat"
+            >
+              <History className="w-5 h-5 text-muted-foreground" />
+            </Link>
+            <NotificationBell />
+          </div>
         </div>
       </div>
 

@@ -13,6 +13,8 @@ import { ContinueWatching } from "@/components/ContinueWatching";
 import { InfiniteDramaSection } from "@/components/InfiniteDramaSection";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { BackToTop } from "@/components/BackToTop";
+import { ContinueWatchingSection } from "@/components/ContinueWatchingSection";
+import { RecommendationsSection } from "@/components/RecommendationsSection";
 
 import { useForYouDramas, useLatestDramas, useTrendingDramas, useDubindoDramas } from "@/hooks/useDramas";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -49,7 +51,12 @@ export default function HomeContent() {
           {/* Banner Ad */}
           <AdsDisplay position="banner" />
 
-          {/* Continue Watching */}
+          {/* Continue Watching (New Feature) */}
+          <ScrollReveal delay={100}>
+            <ContinueWatchingSection />
+          </ScrollReveal>
+
+          {/* Continue Watching (Legacy) */}
           <ScrollReveal delay={100}>
             <ContinueWatching />
           </ScrollReveal>
@@ -101,8 +108,13 @@ export default function HomeContent() {
             />
           </ScrollReveal>
 
-          {/* Infinite Scroll Section */}
+          {/* Recommendations Section */}
           <ScrollReveal delay={300}>
+            <RecommendationsSection limit={10} />
+          </ScrollReveal>
+
+          {/* Infinite Scroll Section */}
+          <ScrollReveal delay={400}>
             <InfiniteDramaSection title="Lainnya" />
           </ScrollReveal>
         </div>

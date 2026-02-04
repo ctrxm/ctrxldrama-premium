@@ -15,8 +15,10 @@ interface WatchHistory {
   drama_cover: string;
   episode_number: number;
   progress: number;
+  watch_position: number;
+  duration: number;
   platform: string;
-  updated_at: string;
+  last_watched_at: string;
 }
 
 export function ContinueWatching() {
@@ -39,7 +41,7 @@ export function ContinueWatching() {
         .from('watch_history')
         .select('*')
         .eq('user_id', user?.id)
-        .order('updated_at', { ascending: false })
+        .order('last_watched_at', { ascending: false })
         .limit(6);
 
       if (error) throw error;
@@ -97,7 +99,7 @@ export function ContinueWatching() {
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700/50">
                   <div
                     className="h-full bg-primary transition-all"
-                    style={{ width: `${item.progress}%` }}
+                    style={{ width: `${item.duration > 0 ? (item.watch_position / item.duration) * 100 : 0}%` }}
                   />
                 </div>
               </div>
@@ -107,7 +109,7 @@ export function ContinueWatching() {
                 {item.drama_title}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Episode {item.episode_number} • {Math.round(item.progress)}%
+                Episode {item.episode_number} • {item.duration > 0 ? Math.round((item.watch_position / item.duration) * 100) : 0}%
               </p>
             </Link>
           ))

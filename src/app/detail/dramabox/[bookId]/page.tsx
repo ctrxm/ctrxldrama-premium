@@ -4,9 +4,16 @@ import { UnifiedErrorDisplay } from "@/components/UnifiedErrorDisplay";
 import { useDramaDetail } from "@/hooks/useDramaDetail";
 import { Play, Calendar, ChevronLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import type { DramaDetailDirect, DramaDetailResponseLegacy } from "@/types/drama";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
+import { SubscribeButton } from "@/components/SubscribeButton";
+import { RatingStars } from "@/components/RatingStars";
+import { CommentsSection } from "@/components/CommentsSection";
+import { ReviewsList } from "@/components/ReviewsList";
 
 // Helper to check if response is new format
 function isDirectFormat(data: unknown): data is DramaDetailDirect {
@@ -117,6 +124,21 @@ export default function DramaBoxDetailPage() {
                   Tonton Sekarang
                 </Link>
               </div>
+              <div className="absolute top-3 right-3 flex flex-col gap-2">
+                <FavoriteButton
+                  drama_id={book.bookId}
+                  platform="dramabox"
+                  drama_title={book.bookName}
+                  drama_cover={book.cover}
+                  drama_genre={book.tags?.[0]}
+                />
+                <ShareButton title={book.bookName} description={book.introduction?.slice(0, 100)} />
+                <SubscribeButton
+                  drama_id={book.bookId}
+                  platform="dramabox"
+                  drama_title={book.bookName}
+                />
+              </div>
             </div>
 
             {/* Info */}
@@ -160,6 +182,12 @@ export default function DramaBoxDetailPage() {
                 </p>
               </div>
 
+              {/* Rating */}
+              <div className="glass rounded-xl p-4">
+                <h3 className="font-semibold text-foreground mb-3">Beri Rating</h3>
+                <RatingStars drama_id={book.bookId} platform="dramabox" showReview size="lg" />
+              </div>
+
               {/* Watch Button */}
               <Link
                 href={`/watch/dramabox/${book.bookId}`}
@@ -172,6 +200,22 @@ export default function DramaBoxDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reviews & Comments Tabs */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Tabs defaultValue="reviews" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="reviews">Ulasan</TabsTrigger>
+            <TabsTrigger value="comments">Komentar</TabsTrigger>
+          </TabsList>
+          <TabsContent value="reviews">
+            <ReviewsList drama_id={book.bookId} platform="dramabox" />
+          </TabsContent>
+          <TabsContent value="comments">
+            <CommentsSection drama_id={book.bookId} platform="dramabox" />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );
