@@ -61,6 +61,8 @@ ALTER TABLE public.maintenance ENABLE ROW LEVEL SECURITY;
 -- Drop existing policies if they exist (to allow re-running)
 DO $$ BEGIN
   DROP POLICY IF EXISTS "Users can view their own data" ON public.users;
+  DROP POLICY IF EXISTS "Users can insert their own data" ON public.users;
+  DROP POLICY IF EXISTS "Users can update their own data" ON public.users;
   DROP POLICY IF EXISTS "Admins can view all users" ON public.users;
   DROP POLICY IF EXISTS "Anyone can view statistics" ON public.statistics;
   DROP POLICY IF EXISTS "Admins can update statistics" ON public.statistics;
@@ -74,6 +76,12 @@ END $$;
 -- Users policies
 CREATE POLICY "Users can view their own data" ON public.users
   FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own data" ON public.users
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update their own data" ON public.users
+  FOR UPDATE USING (auth.uid() = id);
 
 CREATE POLICY "Admins can view all users" ON public.users
   FOR SELECT USING (
