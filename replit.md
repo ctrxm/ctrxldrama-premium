@@ -71,6 +71,25 @@ npm run build
 npm run start
 ```
 
+### Cloudflare Deployment
+The project is configured for Cloudflare Workers deployment using `@opennextjs/cloudflare`:
+
+```bash
+# Build for Cloudflare
+npm run build:cloudflare
+
+# Preview locally with Wrangler
+npm run preview:cloudflare
+
+# Deploy to Cloudflare Workers
+npm run deploy:cloudflare
+```
+
+**Note:** 
+- Uses `@opennextjs/cloudflare` (replaces deprecated `@cloudflare/next-on-pages`)
+- Requires `nodejs_compat` flag and `compatibility_date >= 2024-09-23`
+- Configuration in `wrangler.toml` and `open-next.config.ts`
+
 ## Recent Changes
 - 2026-02-04: Added new user engagement features
   - Favorites/Watchlist system
