@@ -58,6 +58,19 @@ ALTER TABLE public.statistics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.maintenance ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (to allow re-running)
+DO $$ BEGIN
+  DROP POLICY IF EXISTS "Users can view their own data" ON public.users;
+  DROP POLICY IF EXISTS "Admins can view all users" ON public.users;
+  DROP POLICY IF EXISTS "Anyone can view statistics" ON public.statistics;
+  DROP POLICY IF EXISTS "Admins can update statistics" ON public.statistics;
+  DROP POLICY IF EXISTS "Anyone can view active ads" ON public.ads;
+  DROP POLICY IF EXISTS "Admins can manage ads" ON public.ads;
+  DROP POLICY IF EXISTS "Anyone can view maintenance status" ON public.maintenance;
+  DROP POLICY IF EXISTS "Admins can update maintenance" ON public.maintenance;
+EXCEPTION WHEN undefined_table THEN NULL;
+END $$;
+
 -- Users policies
 CREATE POLICY "Users can view their own data" ON public.users
   FOR SELECT USING (auth.uid() = id);
@@ -114,6 +127,12 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Drop existing triggers if they exist
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
+DROP TRIGGER IF EXISTS update_statistics_updated_at ON public.statistics;
+DROP TRIGGER IF EXISTS update_ads_updated_at ON public.ads;
+DROP TRIGGER IF EXISTS update_maintenance_updated_at ON public.maintenance;
 
 -- Triggers for updated_at
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
