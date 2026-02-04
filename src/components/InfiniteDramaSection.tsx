@@ -115,7 +115,7 @@ export function InfiniteDramaSection({ title }: InfiniteDramaSectionProps) {
         {isFetchingNextPage ? (
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         ) : hasNextPage ? (
-          <div className="h-20 w-full" /> {/* Larger invisible trigger */}
+          <div className="h-20 w-full" />
         ) : (
           <p className="text-muted-foreground text-sm">Sudah mencapai akhir daftar</p>
         )}

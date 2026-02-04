@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['https://*.replit.dev', 'https://*.replit.app', 'https://*.spock.replit.dev', 'https://*.riker.replit.dev', 'https://*.picard.replit.dev', 'https://*.kirk.replit.dev', 'https://*.janeway.replit.dev'],
   images: {
     unoptimized: true,
     remotePatterns: [
