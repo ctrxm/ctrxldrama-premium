@@ -119,6 +119,36 @@ ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.drama_stats ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (to allow re-running)
+DO $$ BEGIN
+  DROP POLICY IF EXISTS "Users can view their own favorites" ON public.favorites;
+  DROP POLICY IF EXISTS "Users can insert their own favorites" ON public.favorites;
+  DROP POLICY IF EXISTS "Users can delete their own favorites" ON public.favorites;
+  DROP POLICY IF EXISTS "Users can view their own watch history" ON public.watch_history;
+  DROP POLICY IF EXISTS "Users can insert their own watch history" ON public.watch_history;
+  DROP POLICY IF EXISTS "Users can update their own watch history" ON public.watch_history;
+  DROP POLICY IF EXISTS "Users can delete their own watch history" ON public.watch_history;
+  DROP POLICY IF EXISTS "Anyone can view ratings" ON public.ratings;
+  DROP POLICY IF EXISTS "Users can insert their own ratings" ON public.ratings;
+  DROP POLICY IF EXISTS "Users can update their own ratings" ON public.ratings;
+  DROP POLICY IF EXISTS "Users can delete their own ratings" ON public.ratings;
+  DROP POLICY IF EXISTS "Anyone can view comments" ON public.comments;
+  DROP POLICY IF EXISTS "Users can insert their own comments" ON public.comments;
+  DROP POLICY IF EXISTS "Users can update their own comments" ON public.comments;
+  DROP POLICY IF EXISTS "Users can delete their own comments" ON public.comments;
+  DROP POLICY IF EXISTS "Anyone can view comment likes" ON public.comment_likes;
+  DROP POLICY IF EXISTS "Users can like comments" ON public.comment_likes;
+  DROP POLICY IF EXISTS "Users can unlike comments" ON public.comment_likes;
+  DROP POLICY IF EXISTS "Users can view their own subscriptions" ON public.subscriptions;
+  DROP POLICY IF EXISTS "Users can insert their own subscriptions" ON public.subscriptions;
+  DROP POLICY IF EXISTS "Users can delete their own subscriptions" ON public.subscriptions;
+  DROP POLICY IF EXISTS "Users can view their own notifications" ON public.notifications;
+  DROP POLICY IF EXISTS "Users can update their own notifications" ON public.notifications;
+  DROP POLICY IF EXISTS "Anyone can view drama stats" ON public.drama_stats;
+  DROP POLICY IF EXISTS "System can update drama stats" ON public.drama_stats;
+EXCEPTION WHEN undefined_table THEN NULL;
+END $$;
+
 -- Favorites policies
 CREATE POLICY "Users can view their own favorites" ON public.favorites
   FOR SELECT USING (auth.uid() = user_id);
@@ -184,6 +214,14 @@ CREATE POLICY "Anyone can view drama stats" ON public.drama_stats
   FOR SELECT USING (true);
 CREATE POLICY "System can update drama stats" ON public.drama_stats
   FOR ALL USING (true);
+
+-- Drop existing triggers if they exist
+DROP TRIGGER IF EXISTS update_ratings_updated_at ON public.ratings;
+DROP TRIGGER IF EXISTS update_comments_updated_at ON public.comments;
+DROP TRIGGER IF EXISTS update_drama_stats_updated_at ON public.drama_stats;
+DROP TRIGGER IF EXISTS on_rating_change ON public.ratings;
+DROP TRIGGER IF EXISTS on_favorite_change ON public.favorites;
+DROP TRIGGER IF EXISTS on_watch_history_insert ON public.watch_history;
 
 -- Triggers for updated_at
 CREATE TRIGGER update_ratings_updated_at BEFORE UPDATE ON public.ratings
