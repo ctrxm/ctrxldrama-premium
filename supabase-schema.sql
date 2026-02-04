@@ -73,7 +73,7 @@ DO $$ BEGIN
 EXCEPTION WHEN undefined_table THEN NULL;
 END $$;
 
--- Users policies
+-- Users policies (simplified to avoid infinite recursion)
 CREATE POLICY "Users can view their own data" ON public.users
   FOR SELECT USING (auth.uid() = id);
 
@@ -82,14 +82,6 @@ CREATE POLICY "Users can insert their own data" ON public.users
 
 CREATE POLICY "Users can update their own data" ON public.users
   FOR UPDATE USING (auth.uid() = id);
-
-CREATE POLICY "Admins can view all users" ON public.users
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
 
 -- Statistics policies (public read, admin write)
 CREATE POLICY "Anyone can view statistics" ON public.statistics
