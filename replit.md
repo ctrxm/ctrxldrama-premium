@@ -25,6 +25,7 @@ A premium streaming platform built with Next.js 16, featuring a corporate editor
 ```
 src/
 ├── app/           # Next.js App Router pages
+│   ├── chat/      # Community chat page
 │   ├── favorites/ # Favorites/Library page
 │   ├── history/   # Watch history page
 │   ├── detail/    # Drama detail pages
@@ -56,6 +57,7 @@ src/
 6. **Share** - Share dramas to social media (WhatsApp, Telegram, Twitter)
 7. **Trending** - View trending dramas based on views and favorites
 8. **Recommendations** - Personalized recommendations based on watch history
+9. **Community Chat** - Real-time chat for all users (view), registered users can send messages
 
 ### Database Schema
 Tables in `supabase-features-schema.sql`:
@@ -67,6 +69,9 @@ Tables in `supabase-features-schema.sql`:
 - `subscriptions` - Episode notification subscriptions
 - `notifications` - User notifications
 - `drama_stats` - Aggregated drama statistics
+
+Tables in `supabase-chat-schema.sql`:
+- `chat_messages` - Community chat messages with real-time sync
 
 ### Environment Variables
 Required environment variables (stored in `.env.local`):
@@ -109,6 +114,12 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-05: Replaced Browse with Community Chat feature
+  - Real-time chat using Supabase realtime subscriptions
+  - All users can view messages
+  - Only registered users can send messages
+  - Delete own messages functionality
+  - Time-ago display for message timestamps
 - 2026-02-05: Complete UI redesign to modern premium streaming style
   - Updated color scheme to purple/violet with gradient accents
   - Changed typography to Plus Jakarta Sans for modern look

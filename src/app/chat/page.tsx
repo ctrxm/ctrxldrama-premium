@@ -102,9 +102,23 @@ export default function ChatPage() {
                 <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <MessageCircle className="w-12 h-12 text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">{error}</p>
+              <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                {error.includes('being set up') ? (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-4">
+                      <MessageCircle className="w-8 h-8 text-amber-400" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">Coming Soon</h3>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-4">
+                      <MessageCircle className="w-8 h-8 text-red-400" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">Oops!</h3>
+                  </>
+                )}
+                <p className="text-sm text-muted-foreground max-w-xs">{error}</p>
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">

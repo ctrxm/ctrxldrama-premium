@@ -28,9 +28,17 @@ export function useChat() {
         .order('created_at', { ascending: true })
         .limit(100);
 
-      if (fetchError) throw fetchError;
-      setMessages(data || []);
-      setError(null);
+      if (fetchError) {
+        if (fetchError.code === 'PGRST205') {
+          setError('Chat feature is being set up. Please check back soon!');
+          setMessages([]);
+        } else {
+          throw fetchError;
+        }
+      } else {
+        setMessages(data || []);
+        setError(null);
+      }
     } catch (err) {
       console.error('Error fetching messages:', err);
       setError('Failed to load messages');
@@ -74,7 +82,18 @@ export function useChat() {
   }, [fetchMessages]);
 
   const sendMessage = useCallback(async (messageText: string) => {
-    if (!user || !messageText.trim()) return false;
+    if (!messageText.trim()) return false;
+    
+    if (!user) {
+      setError('You must be signed in to send messages');
+      return false;
+    }
+
+    const { data: session } = await supabase.auth.getSession();
+    if (!session?.session?.user) {
+      setError('Session expired. Please sign in again.');
+      return false;
+    }
 
     setSending(true);
     try {
@@ -86,13 +105,23 @@ export function useChat() {
       const { error: insertError } = await supabase
         .from('chat_messages')
         .insert({
-          user_id: user.id,
-          user_email: user.email || '',
+          user_id: session.session.user.id,
+          user_email: session.session.user.email || '',
           user_name: userName,
           message: messageText.trim(),
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        if (insertError.code === 'PGRST204' || insertError.message?.includes('permission denied')) {
+          setError('You do not have permission to send messages');
+        } else if (insertError.code === 'PGRST205') {
+          setError('Chat feature is not available yet');
+        } else {
+          throw insertError;
+        }
+        return false;
+      }
+      setError(null);
       return true;
     } catch (err) {
       console.error('Error sending message:', err);
