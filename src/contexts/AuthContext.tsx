@@ -110,6 +110,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Signup error:', error);
+        // Handle specific Supabase errors
+        if (error.message.includes('Database error saving new user')) {
+          throw new Error('Registration temporarily unavailable. Please try again later.');
+        }
         throw new Error(error.message || 'Failed to sign up');
       }
 
@@ -117,9 +121,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No user data returned from signup');
       }
 
-      // User record will be created automatically by trigger
-      // Wait a bit for the trigger to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Try to create user record manually if trigger didn't work
+      try {
+        const { error: insertError } = await supabase
+          .from('users')
+          .upsert([{ 
+            id: data.user.id, 
+            email: data.user.email || email,
+            role: 'user' 
+          }], { 
+            onConflict: 'id',
+            ignoreDuplicates: true 
+          });
+        
+        if (insertError) {
+          console.warn('Could not create user record:', insertError);
+          // Don't throw - user is still created in auth
+        }
+      } catch (e) {
+        console.warn('Error creating user record:', e);
+        // Don't throw - user is still created in auth
+      }
 
       console.log('Signup successful:', data.user.email);
     } catch (error: any) {
