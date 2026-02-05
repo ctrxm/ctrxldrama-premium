@@ -83,11 +83,21 @@ CREATE POLICY "Users can insert their own data" ON public.users
 CREATE POLICY "Users can update their own data" ON public.users
   FOR UPDATE USING (auth.uid() = id);
 
+-- Function to check if current user is admin (avoids recursion in policies)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+DECLARE
+  user_role TEXT;
+BEGIN
+  SELECT role INTO user_role FROM public.users WHERE id = auth.uid();
+  RETURN user_role = 'admin';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Admin policy to view all users (for VIP management, user management, etc.)
+-- Uses SECURITY DEFINER function to avoid infinite recursion
 CREATE POLICY "Admins can view all users" ON public.users
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR SELECT USING (public.is_admin());
 
 -- Statistics policies (public read, admin write)
 CREATE POLICY "Anyone can view statistics" ON public.statistics

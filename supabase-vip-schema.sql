@@ -32,18 +32,24 @@ CREATE POLICY "Users can read own subscriptions" ON vip_subscriptions
 CREATE POLICY "Users can create subscription requests" ON vip_subscriptions
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+-- Function to check if current user is admin (if not already created)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+DECLARE
+  user_role TEXT;
+BEGIN
+  SELECT role INTO user_role FROM public.users WHERE id = auth.uid();
+  RETURN user_role = 'admin';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Policy: Admins can read all subscriptions (for approval)
--- Note: This policy checks if the user has admin role in the users table
 CREATE POLICY "Admins can read all subscriptions" ON vip_subscriptions
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR SELECT USING (public.is_admin());
 
 -- Policy: Admins can update subscriptions (for approval)
 CREATE POLICY "Admins can update subscriptions" ON vip_subscriptions
-  FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR UPDATE USING (public.is_admin());
 
 -- Function to check if user is VIP
 CREATE OR REPLACE FUNCTION is_user_vip(check_user_id UUID)
