@@ -44,7 +44,8 @@ src/
 - **PlatformSelector** - Tab-based platform switching
 - **BottomNav** - Mobile navigation bar
 - **UnifiedMediaCard** - Grid-based drama cards
-- **TikTokPlayer** - Vertical video player with auto-scroll
+- **UniversalPlayer** - Unified video player for all providers (DramaBox-style UI)
+- **TikTokPlayer** - Legacy vertical video player (deprecated, use UniversalPlayer)
 - **FavoritesList** - Library management
 - **WatchHistoryList** - Continue watching tracking
 
@@ -118,6 +119,15 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-05: Unified Video Player across all providers
+  - Created UniversalPlayer component with DramaBox-style UI
+  - All providers now use the same player design (ReelShort, NetShort, Melolo, FlickReels, FreeReels)
+  - Custom controls: play/pause, mute, quality selector, speed control, episode navigation
+  - HD quality gating with VIP lock icons
+  - Episode list modal with grid layout
+  - Description modal for drama info
+  - Support for both HLS streams and direct MP4 URLs
+  - Keyboard shortcuts (space, m, arrow up/down)
 - 2026-02-05: Added VIP Admin Panel
   - VIP Management page in admin dashboard (/admin/vip)
   - Approve/Reject pending VIP subscription requests
