@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX, Info, X } from "lucide-react";
 import Link from "next/link";
 import Hls from "hls.js";
 
@@ -23,6 +23,7 @@ interface TikTokPlayerProps {
   initialEpisode: number;
   totalEpisodes: number;
   title: string;
+  description?: string;
   episodes: Episode[];
   onEpisodeChange: (episode: number) => void;
   onShowEpisodeList: () => void;
@@ -33,6 +34,7 @@ export default function TikTokPlayer({
   initialEpisode,
   totalEpisodes,
   title,
+  description = "",
   episodes,
   onEpisodeChange,
   onShowEpisodeList,
@@ -45,6 +47,7 @@ export default function TikTokPlayer({
   const [selectedQuality, setSelectedQuality] = useState<string>("auto");
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [showDescription, setShowDescription] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -244,31 +247,31 @@ export default function TikTokPlayer({
           onClick={togglePlayPause}
           className="absolute inset-0 flex items-center justify-center z-20"
         >
-          <div className="w-16 h-16 bg-black/60 flex items-center justify-center">
-            <Play className="w-8 h-8 text-white fill-white" />
+          <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center">
+            <Play className="w-8 h-8 text-white fill-white ml-1" />
           </div>
         </button>
       )}
 
-      <div className={`tiktok-overlay transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`tiktok-overlay transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
         <div className="tiktok-nav">
           <Link
             href={`/detail/reelshort/${bookId}`}
-            className="btn-icon bg-black/50"
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5 text-white" />
           </Link>
 
-          <div className="flex-1 text-center">
-            <p className="text-white text-sm font-medium line-clamp-1">{title}</p>
-            <p className="text-white/60 text-xs">EP {currentEpisode} / {totalEpisodes}</p>
+          <div className="flex-1 text-center px-4">
+            <p className="text-white text-sm font-semibold line-clamp-1">{title}</p>
+            <p className="text-white/60 text-xs">Episode {currentEpisode} of {totalEpisodes}</p>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="relative">
               <button 
                 onClick={() => setShowQualityMenu(!showQualityMenu)}
-                className="btn-icon bg-black/50"
+                className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center"
               >
                 <Settings className="w-4 h-4 text-white" />
               </button>
@@ -276,10 +279,10 @@ export default function TikTokPlayer({
               {showQualityMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowQualityMenu(false)} />
-                  <div className="absolute right-0 top-full mt-2 bg-card border border-border z-50 min-w-[140px]">
+                  <div className="absolute right-0 top-full mt-2 bg-black/90 backdrop-blur-xl rounded-xl border border-white/10 z-50 min-w-[160px] overflow-hidden">
                     <button
                       onClick={() => { setSelectedQuality("auto"); setShowQualityMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm ${selectedQuality === "auto" ? 'text-primary' : 'text-foreground'} hover:bg-muted`}
+                      className={`w-full px-4 py-3 text-left text-sm ${selectedQuality === "auto" ? 'text-violet-400 bg-white/5' : 'text-white'} hover:bg-white/10 transition-colors`}
                     >
                       Auto
                     </button>
@@ -287,7 +290,7 @@ export default function TikTokPlayer({
                       <button
                         key={option.id}
                         onClick={() => { setSelectedQuality(option.id); setShowQualityMenu(false); }}
-                        className={`w-full px-4 py-2 text-left text-sm ${selectedQuality === option.id ? 'text-primary' : 'text-foreground'} hover:bg-muted`}
+                        className={`w-full px-4 py-3 text-left text-sm ${selectedQuality === option.id ? 'text-violet-400 bg-white/5' : 'text-white'} hover:bg-white/10 transition-colors`}
                       >
                         {option.label}
                       </button>
@@ -297,7 +300,7 @@ export default function TikTokPlayer({
               )}
             </div>
             
-            <button onClick={onShowEpisodeList} className="btn-icon bg-black/50">
+            <button onClick={onShowEpisodeList} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
               <List className="w-4 h-4 text-white" />
             </button>
           </div>
@@ -317,6 +320,15 @@ export default function TikTokPlayer({
           <button onClick={toggleMute} className="tiktok-action-btn">
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
+
+          {description && (
+            <button 
+              onClick={() => setShowDescription(true)} 
+              className="tiktok-action-btn"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+          )}
           
           {currentEpisode < totalEpisodes && (
             <button onClick={goToNextEpisode} className="tiktok-action-btn">
@@ -326,23 +338,29 @@ export default function TikTokPlayer({
         </div>
 
         <div className="tiktok-info">
-          <p className="text-white text-sm">
-            <span className="text-white/60">Episode</span> {currentEpisode}
+          <p className="text-white font-semibold text-base mb-1">{title}</p>
+          <p className="text-white/60 text-sm">
+            Episode {currentEpisode}
           </p>
+          {description && (
+            <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">
+              {description}
+            </p>
+          )}
         </div>
 
-        <div className="absolute bottom-12 left-4 right-4 z-30">
-          <div className="flex items-center gap-2 text-[10px] text-white/60 mb-1">
+        <div className="absolute bottom-16 left-4 right-4 z-30">
+          <div className="flex items-center gap-2 text-xs text-white/60 mb-2">
             <span>{formatTime(progress)}</span>
             <span>/</span>
             <span>{formatTime(duration)}</span>
           </div>
           <div 
-            className="h-1 bg-white/20 cursor-pointer"
+            className="h-1 bg-white/20 rounded-full cursor-pointer overflow-hidden"
             onClick={handleSeek}
           >
             <div 
-              className="h-full bg-primary"
+              className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all"
               style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
             />
           </div>
@@ -359,8 +377,45 @@ export default function TikTokPlayer({
             />
           );
         })}
-        {totalEpisodes > 10 && <span className="text-[10px] text-white/60">+{totalEpisodes - 10}</span>}
+        {totalEpisodes > 10 && <span className="text-[10px] text-white/60 ml-1">+{totalEpisodes - 10}</span>}
       </div>
+
+      {showDescription && description && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDescription(false)} />
+          <div className="relative w-full max-w-lg bg-zinc-900 rounded-t-3xl p-6 pb-10 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">About This Drama</h3>
+              <button 
+                onClick={() => setShowDescription(false)}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+            <h4 className="text-base font-semibold text-white mb-2">{title}</h4>
+            <p className="text-sm text-white/70 leading-relaxed">{description}</p>
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-white/10">
+              <span className="text-xs text-white/50">Total Episodes: {totalEpisodes}</span>
+              <span className="text-xs text-white/50">Current: Episode {currentEpisode}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

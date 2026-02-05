@@ -26,6 +26,7 @@ interface DetailData {
   title: string;
   cover: string;
   totalEpisodes: number;
+  introduction?: string;
 }
 
 interface Episode {
@@ -162,6 +163,7 @@ export default function ReelShortWatchPage() {
           initialEpisode={currentEpisode}
           totalEpisodes={totalEpisodes}
           title={detailData.title}
+          description={detailData.introduction || ""}
           episodes={loadedEpisodes}
           onEpisodeChange={handleEpisodeChange}
           onShowEpisodeList={() => setShowEpisodeList(true)}

@@ -27,52 +27,49 @@ export function UnifiedMediaCard({
   link,
   episodes = 0,
   topLeftBadge,
-  topRightBadge,
   index = 0,
 }: UnifiedMediaCardProps) {
   return (
     <Link href={link} className="group block">
-      <div className="card-interactive aspect-poster relative overflow-hidden">
+      <div className="relative aspect-poster rounded-xl overflow-hidden bg-card poster-shadow">
         <img
           src={cover.includes(".heic") 
             ? `https://wsrv.nl/?url=${encodeURIComponent(cover)}&output=jpg` 
             : cover}
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           referrerPolicy="no-referrer"
         />
 
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
         {topLeftBadge && (
-          <div className="absolute top-0 left-0">
-            <div 
-              className={topLeftBadge.isPremium ? "badge-live" : "badge-new"}
-            >
+          <div className="absolute top-2 left-2">
+            <span className={topLeftBadge.isPremium ? "badge-live" : "badge-new"}>
               {topLeftBadge.text}
-            </div>
+            </span>
           </div>
         )}
 
         {episodes > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-black/80 px-2 py-1.5">
-            <div className="flex items-center gap-1.5">
-              <Play className="w-3 h-3 text-primary fill-primary" />
-              <span className="text-[10px] font-medium text-white uppercase tracking-wider">
-                {episodes} EP
-              </span>
+          <div className="absolute bottom-2 left-2 right-2">
+            <div className="badge-episode inline-flex items-center gap-1.5">
+              <Play className="w-3 h-3 fill-current" />
+              <span>{episodes} Episode</span>
             </div>
           </div>
         )}
 
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 bg-primary flex items-center justify-center">
-            <Play className="w-5 h-5 text-white fill-white" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-300">
+            <Play className="w-6 h-6 text-white fill-white ml-1" />
           </div>
         </div>
       </div>
 
-      <div className="mt-2">
-        <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+      <div className="mt-3 px-0.5">
+        <h3 className="text-sm font-medium text-foreground/90 line-clamp-2 leading-snug group-hover:text-white transition-colors">
           {title}
         </h3>
       </div>

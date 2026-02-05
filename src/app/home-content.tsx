@@ -25,15 +25,15 @@ export default function HomeContent() {
   const { data: dubindoDramas, isLoading: loadingDubindo, error: errorDubindo, refetch: refetchDubindo } = useDubindoDramas();
 
   return (
-    <main className="min-h-screen pt-14">
-      <div className="sticky top-14 z-40 bg-background">
+    <main className="min-h-screen pt-16">
+      <div className="sticky top-16 z-40 bg-background/80 backdrop-blur-xl border-b border-white/5">
         <div className="container-main">
           <PlatformSelector />
         </div>
       </div>
 
       {isDramaBox && (
-        <div className="container-main py-6 space-y-8">
+        <div className="container-main py-6 space-y-10">
           <HeroCarousel
             dramas={trendingDramas?.slice(0, 5) || []}
             isLoading={loadingTrending}
@@ -44,7 +44,7 @@ export default function HomeContent() {
           <ContinueWatching />
 
           <DramaSection
-            title="Trending"
+            title="Trending Now"
             dramas={trendingDramas}
             isLoading={loadingTrending}
             error={!!errorTrending}
@@ -77,36 +77,36 @@ export default function HomeContent() {
 
           <RecommendationsSection limit={10} />
 
-          <InfiniteDramaSection title="More Dramas" />
+          <InfiniteDramaSection title="Discover More" />
         </div>
       )}
 
       {isReelShort && (
-        <div className="container-main py-6 space-y-8">
+        <div className="container-main py-6 space-y-10">
           <ReelShortSection />
         </div>
       )}
 
       {isNetShort && (
-        <div className="container-main py-6 space-y-8">
+        <div className="container-main py-6 space-y-10">
           <NetShortHome />
         </div>
       )}
 
       {isMelolo && (
-        <div className="container-main py-6 space-y-8">
+        <div className="container-main py-6 space-y-10">
           <MeloloHome />
         </div>
       )}
 
       {isFlickReels && (
-        <div className="container-main py-6 space-y-8">
+        <div className="container-main py-6 space-y-10">
           <FlickReelsHome />
         </div>
       )}
 
       {isFreeReels && (
-        <div className="container-main py-6 space-y-8">
+        <div className="container-main py-6 space-y-10">
           <FreeReelsHome />
         </div>
       )}

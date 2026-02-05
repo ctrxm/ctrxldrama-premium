@@ -3,6 +3,8 @@
 import { UnifiedMediaCard } from "./UnifiedMediaCard";
 import { UnifiedMediaCardSkeleton } from "./UnifiedMediaCardSkeleton";
 import { UnifiedErrorDisplay } from "./UnifiedErrorDisplay";
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 import type { Drama } from "@/types/drama";
 
 interface DramaSectionProps {
@@ -16,10 +18,9 @@ interface DramaSectionProps {
 export function DramaSection({ title, dramas, isLoading, error, onRetry }: DramaSectionProps) {
   if (error) {
     return (
-      <section>
-        <div className="flex items-center gap-3 mb-4">
+      <section className="fade-in">
+        <div className="section-header">
           <h2 className="section-title">{title}</h2>
-          <div className="flex-1 divider" />
         </div>
         <UnifiedErrorDisplay 
           title={`Failed to load ${title}`}
@@ -33,50 +34,52 @@ export function DramaSection({ title, dramas, isLoading, error, onRetry }: Drama
   if (isLoading) {
     return (
       <section>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-3 w-24 skeleton-base" />
-          <div className="flex-1 divider" />
+        <div className="section-header">
+          <div className="h-5 w-28 skeleton-base rounded-lg" />
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-px bg-border">
-          {Array.from({ length: 14 }).map((_, i) => (
-            <div key={i} className="bg-background p-2">
-              <UnifiedMediaCardSkeleton />
-            </div>
+        <div className="grid-cards">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <UnifiedMediaCardSkeleton key={i} />
           ))}
         </div>
       </section>
     );
   }
 
+  if (!dramas || dramas.length === 0) {
+    return null;
+  }
+
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
+    <section className="fade-in">
+      <div className="section-header">
         <h2 className="section-title">{title}</h2>
-        <div className="flex-1 divider" />
-        {dramas && dramas.length > 16 && (
-          <span className="text-label">{dramas.length} titles</span>
+        {dramas.length > 12 && (
+          <Link href="/browse" className="section-link flex items-center gap-1">
+            View All
+            <ChevronRight className="w-4 h-4" />
+          </Link>
         )}
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-px bg-border">
-        {dramas?.slice(0, 14).map((drama, index) => {
+      <div className="grid-cards">
+        {dramas.slice(0, 12).map((drama, index) => {
           const isPopular = drama.corner?.name?.toLowerCase().includes("populer");
           const badgeColor = isPopular ? "#E52E2E" : (drama.corner?.color || "#e5a00d");
 
           return (
-            <div key={drama.bookId || `drama-${index}`} className="bg-background p-2">
-              <UnifiedMediaCard 
-                index={index}
-                title={drama.bookName}
-                cover={drama.coverWap || drama.cover || ""}
-                link={`/detail/dramabox/${drama.bookId}`}
-                episodes={drama.chapterCount}
-                topLeftBadge={drama.corner ? {
-                  text: drama.corner.name,
-                  color: badgeColor
-                } : null}
-              />
-            </div>
+            <UnifiedMediaCard 
+              key={drama.bookId || `drama-${index}`}
+              index={index}
+              title={drama.bookName}
+              cover={drama.coverWap || drama.cover || ""}
+              link={`/detail/dramabox/${drama.bookId}`}
+              episodes={drama.chapterCount}
+              topLeftBadge={drama.corner ? {
+                text: drama.corner.name,
+                color: badgeColor
+              } : null}
+            />
           );
         })}
       </div>
