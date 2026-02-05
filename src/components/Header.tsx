@@ -107,8 +107,8 @@ export function Header() {
             <Link href="/" className={`nav-item ${pathname === '/' ? 'active' : ''}`}>
               Home
             </Link>
-            <Link href="/browse" className={`nav-item ${pathname === '/browse' ? 'active' : ''}`}>
-              Browse
+            <Link href="/chat" className={`nav-item ${pathname === '/chat' ? 'active' : ''}`}>
+              Chat
             </Link>
             <Link href="/favorites" className={`nav-item ${pathname === '/favorites' ? 'active' : ''}`}>
               Library
