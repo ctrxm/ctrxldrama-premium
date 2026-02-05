@@ -58,6 +58,7 @@ src/
 7. **Trending** - View trending dramas based on views and favorites
 8. **Recommendations** - Personalized recommendations based on watch history
 9. **Community Chat** - Real-time chat for all users (view), registered users can send messages
+10. **VIP Membership** - Premium subscription with ad-free experience, HD quality, VIP badge
 
 ### Database Schema
 Tables in `supabase-features-schema.sql`:
@@ -72,6 +73,9 @@ Tables in `supabase-features-schema.sql`:
 
 Tables in `supabase-chat-schema.sql`:
 - `chat_messages` - Community chat messages with real-time sync
+
+Tables in `supabase-vip-schema.sql`:
+- `vip_subscriptions` - VIP membership subscriptions with payment tracking
 
 ### Environment Variables
 Required environment variables (stored in `.env.local`):
@@ -114,6 +118,11 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-05: Added VIP Membership System
+  - VIP subscription page with QRIS payment
+  - Ad-free experience for VIP users
+  - VIP badge in chat messages
+  - Monthly, yearly, and lifetime plans
 - 2026-02-05: Replaced Browse with Community Chat feature
   - Real-time chat using Supabase realtime subscriptions
   - All users can view messages

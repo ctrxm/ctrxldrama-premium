@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useVipStatus } from '@/hooks/useVipStatus';
 
 interface Ad {
   id: string;
@@ -24,6 +25,7 @@ interface AdsDisplayProps {
 }
 
 export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
+  const { isVip, loading: vipLoading } = useVipStatus();
   const [ads, setAds] = useState<Ad[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
@@ -31,6 +33,8 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (vipLoading) return;
+    if (isVip) return;
     fetchAds();
     
     // Check if popup was dismissed in this session
@@ -56,7 +60,7 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [position]);
+  }, [position, isVip, vipLoading]);
 
   useEffect(() => {
     // Auto-rotate ads every 10 seconds
@@ -109,7 +113,7 @@ export function AdsDisplay({ position, className = '' }: AdsDisplayProps) {
     sessionStorage.setItem(`bottom-ad-dismissed-${currentAd?.id}`, 'true');
   };
 
-  if (loading || ads.length === 0) {
+  if (isVip || loading || ads.length === 0) {
     return null;
   }
 
