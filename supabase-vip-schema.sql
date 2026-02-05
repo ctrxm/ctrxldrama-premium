@@ -35,13 +35,13 @@ CREATE POLICY "Users can create subscription requests" ON vip_subscriptions
 -- Policy: Admins can read all subscriptions (for approval)
 CREATE POLICY "Admins can read all subscriptions" ON vip_subscriptions
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND role = 'admin')
+    EXISTS (SELECT 1 FROM users WHERE id::uuid = auth.uid() AND role = 'admin')
   );
 
 -- Policy: Admins can update subscriptions (for approval)
 CREATE POLICY "Admins can update subscriptions" ON vip_subscriptions
   FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND role = 'admin')
+    EXISTS (SELECT 1 FROM users WHERE id::uuid = auth.uid() AND role = 'admin')
   );
 
 -- Function to check if user is VIP
