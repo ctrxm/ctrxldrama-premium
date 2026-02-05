@@ -82,22 +82,22 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
       <div className="container-main">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-xl overflow-hidden">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden flex-shrink-0">
               <Image
                 src="/logo.png"
                 alt="CTRXL Drama"
                 fill
                 className="object-cover"
-                sizes="36px"
+                sizes="(max-width: 640px) 32px, 36px"
                 priority
               />
             </div>
-            <div className="hidden sm:flex flex-col">
-              <span className="text-base font-bold text-foreground leading-tight">
+            <div className="flex flex-col">
+              <span className="text-sm sm:text-base font-bold text-foreground leading-tight">
                 CTRXL Drama
               </span>
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground hidden sm:block">
                 Streaming Platform
               </span>
             </div>

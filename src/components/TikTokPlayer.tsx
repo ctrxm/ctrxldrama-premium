@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX, Info, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Hls from "hls.js";
 
 interface VideoItem {
@@ -42,6 +43,7 @@ export default function TikTokPlayer({
   const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [selectedQuality, setSelectedQuality] = useState<string>("auto");
@@ -86,6 +88,7 @@ export default function TikTokPlayer({
     if (!videoRef.current) return;
 
     const video = videoRef.current;
+    setIsLoading(true);
 
     if (Hls.isSupported()) {
       if (hlsRef.current) {
@@ -240,9 +243,29 @@ export default function TikTokPlayer({
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleVideoEnded}
         onClick={togglePlayPause}
+        onCanPlay={() => setIsLoading(false)}
+        onWaiting={() => setIsLoading(true)}
+        onPlaying={() => setIsLoading(false)}
       />
 
-      {!isPlaying && (
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/40">
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative w-16 h-16 animate-pulse">
+              <Image
+                src="/logo.png"
+                alt="Loading..."
+                fill
+                className="object-contain"
+                sizes="64px"
+              />
+            </div>
+            <span className="text-white/60 text-xs">Loading...</span>
+          </div>
+        </div>
+      )}
+
+      {!isPlaying && !isLoading && (
         <button
           onClick={togglePlayPause}
           className="absolute inset-0 flex items-center justify-center z-20"
