@@ -104,36 +104,21 @@ CREATE POLICY "Anyone can view statistics" ON public.statistics
   FOR SELECT USING (true);
 
 CREATE POLICY "Admins can update statistics" ON public.statistics
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  FOR UPDATE USING (public.is_admin());
 
 -- Ads policies (public read, admin write)
 CREATE POLICY "Anyone can view active ads" ON public.ads
   FOR SELECT USING (is_active = true);
 
 CREATE POLICY "Admins can manage ads" ON public.ads
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  FOR ALL USING (public.is_admin());
 
 -- Maintenance policies
 CREATE POLICY "Anyone can view maintenance status" ON public.maintenance
   FOR SELECT USING (true);
 
 CREATE POLICY "Admins can update maintenance" ON public.maintenance
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  FOR UPDATE USING (public.is_admin());
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
