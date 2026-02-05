@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX, Info, X } from "lucide-react";
+import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX, Info, X, Gauge, PictureInPicture2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Hls from "hls.js";
@@ -47,9 +47,15 @@ export default function TikTokPlayer({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [selectedQuality, setSelectedQuality] = useState<string>("auto");
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showDescription, setShowDescription] = useState(false);
+  const [isPiPSupported, setIsPiPSupported] = useState(false);
+  const [isPiPActive, setIsPiPActive] = useState(false);
+
+  const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -170,6 +176,45 @@ export default function TikTokPlayer({
     videoRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
   }, [isMuted]);
+
+  const changePlaybackSpeed = useCallback((speed: number) => {
+    if (!videoRef.current) return;
+    videoRef.current.playbackRate = speed;
+    setPlaybackSpeed(speed);
+    setShowSpeedMenu(false);
+  }, []);
+
+  const togglePiP = useCallback(async () => {
+    if (!videoRef.current) return;
+    
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        setIsPiPActive(false);
+      } else if (document.pictureInPictureEnabled) {
+        await videoRef.current.requestPictureInPicture();
+        setIsPiPActive(true);
+      }
+    } catch (error) {
+      console.error('PiP error:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    setIsPiPSupported(document.pictureInPictureEnabled === true);
+    
+    const handlePiPChange = () => {
+      setIsPiPActive(!!document.pictureInPictureElement);
+    };
+    
+    document.addEventListener('enterpictureinpicture', handlePiPChange);
+    document.addEventListener('leavepictureinpicture', handlePiPChange);
+    
+    return () => {
+      document.removeEventListener('enterpictureinpicture', handlePiPChange);
+      document.removeEventListener('leavepictureinpicture', handlePiPChange);
+    };
+  }, []);
 
   const goToPrevEpisode = useCallback(() => {
     if (currentEpisode > 1) {
@@ -343,6 +388,48 @@ export default function TikTokPlayer({
           <button onClick={toggleMute} className="tiktok-action-btn">
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
+
+          <div className="relative">
+            <button 
+              onClick={() => setShowSpeedMenu(!showSpeedMenu)} 
+              className="tiktok-action-btn"
+            >
+              <Gauge className="w-5 h-5" />
+              {playbackSpeed !== 1 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-violet-500 text-[9px] font-bold flex items-center justify-center">
+                  {playbackSpeed}x
+                </span>
+              )}
+            </button>
+            {showSpeedMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowSpeedMenu(false)} />
+                <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/90 backdrop-blur-xl rounded-xl border border-white/10 z-50 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-white/10">
+                    <span className="text-[10px] text-white/50 uppercase tracking-wider">Speed</span>
+                  </div>
+                  {speedOptions.map((speed) => (
+                    <button
+                      key={speed}
+                      onClick={() => changePlaybackSpeed(speed)}
+                      className={`w-full px-4 py-2.5 text-left text-sm whitespace-nowrap ${playbackSpeed === speed ? 'text-violet-400 bg-white/5' : 'text-white'} hover:bg-white/10 transition-colors`}
+                    >
+                      {speed}x {speed === 1 && '(Normal)'}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {isPiPSupported && (
+            <button 
+              onClick={togglePiP} 
+              className={`tiktok-action-btn ${isPiPActive ? 'text-violet-400' : ''}`}
+            >
+              <PictureInPicture2 className="w-5 h-5" />
+            </button>
+          )}
 
           {description && (
             <button 

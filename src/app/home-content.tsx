@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { PlatformSelector } from "@/components/PlatformSelector";
 import { DramaSection } from "@/components/DramaSection";
 import { ReelShortSection } from "@/components/ReelShortSection";
@@ -8,10 +9,11 @@ import { MeloloHome } from "@/components/MeloloHome";
 import { FlickReelsHome } from "@/components/FlickReelsHome";
 import { FreeReelsHome } from "@/components/FreeReelsHome";
 import { HeroCarousel } from "@/components/HeroCarousel";
-import { ContinueWatching } from "@/components/ContinueWatching";
 import { InfiniteDramaSection } from "@/components/InfiniteDramaSection";
 import { ContinueWatchingSection } from "@/components/ContinueWatchingSection";
 import { RecommendationsSection } from "@/components/RecommendationsSection";
+import { RecentlyAddedSection } from "@/components/RecentlyAddedSection";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 import { useForYouDramas, useLatestDramas, useTrendingDramas, useDubindoDramas } from "@/hooks/useDramas";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -24,6 +26,15 @@ export default function HomeContent() {
   const { data: trendingDramas, isLoading: loadingTrending, error: errorTrending, refetch: refetchTrending } = useTrendingDramas();
   const { data: dubindoDramas, isLoading: loadingDubindo, error: errorDubindo, refetch: refetchDubindo } = useDubindoDramas();
 
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([
+      refetchTrending(),
+      refetchPopular(),
+      refetchLatest(),
+      refetchDubindo(),
+    ]);
+  }, [refetchTrending, refetchPopular, refetchLatest, refetchDubindo]);
+
   return (
     <main className="min-h-screen pt-16">
       <div className="sticky top-16 z-40 bg-background/80 backdrop-blur-xl border-b border-white/5">
@@ -33,52 +44,54 @@ export default function HomeContent() {
       </div>
 
       {isDramaBox && (
-        <div className="container-main py-6 space-y-10">
-          <HeroCarousel
-            dramas={trendingDramas?.slice(0, 5) || []}
-            isLoading={loadingTrending}
-          />
+        <PullToRefresh onRefresh={handleRefresh}>
+          <div className="container-main py-6 space-y-10">
+            <HeroCarousel
+              dramas={trendingDramas?.slice(0, 5) || []}
+              isLoading={loadingTrending}
+            />
 
-          <ContinueWatchingSection />
+            <ContinueWatchingSection />
 
-          <ContinueWatching />
+            <RecentlyAddedSection limit={6} />
 
-          <DramaSection
-            title="Trending Now"
-            dramas={trendingDramas}
-            isLoading={loadingTrending}
-            error={!!errorTrending}
-            onRetry={() => refetchTrending()}
-          />
+            <DramaSection
+              title="Trending Now"
+              dramas={trendingDramas}
+              isLoading={loadingTrending}
+              error={!!errorTrending}
+              onRetry={() => refetchTrending()}
+            />
 
-          <DramaSection
-            title="Popular"
-            dramas={popularDramas}
-            isLoading={loadingPopular}
-            error={!!errorPopular}
-            onRetry={() => refetchPopular()}
-          />
+            <DramaSection
+              title="Popular"
+              dramas={popularDramas}
+              isLoading={loadingPopular}
+              error={!!errorPopular}
+              onRetry={() => refetchPopular()}
+            />
 
-          <DramaSection
-            title="Latest"
-            dramas={latestDramas}
-            isLoading={loadingLatest}
-            error={!!errorLatest}
-            onRetry={() => refetchLatest()}
-          />
+            <DramaSection
+              title="Latest"
+              dramas={latestDramas}
+              isLoading={loadingLatest}
+              error={!!errorLatest}
+              onRetry={() => refetchLatest()}
+            />
 
-          <DramaSection
-            title="Dubbed"
-            dramas={dubindoDramas}
-            isLoading={loadingDubindo}
-            error={!!errorDubindo}
-            onRetry={() => refetchDubindo()}
-          />
+            <DramaSection
+              title="Dubbed"
+              dramas={dubindoDramas}
+              isLoading={loadingDubindo}
+              error={!!errorDubindo}
+              onRetry={() => refetchDubindo()}
+            />
 
-          <RecommendationsSection limit={10} />
+            <RecommendationsSection limit={10} />
 
-          <InfiniteDramaSection title="Discover More" />
-        </div>
+            <InfiniteDramaSection title="Discover More" />
+          </div>
+        </PullToRefresh>
       )}
 
       {isReelShort && (
