@@ -118,6 +118,12 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-05: Enhanced VIP Membership System
+  - Fixed HD quality gating - non-VIP users can only access SD quality (< 720p)
+  - HD quality options show lock icon and redirect to VIP page when clicked
+  - Auto mode now selects from available (non-HD) videos for non-VIP users
+  - Optimized ads loading - VIP users skip ad fetching entirely
+  - VIP badge in chat uses actual VIP status from database
 - 2026-02-05: Added VIP Membership System
   - VIP subscription page with QRIS payment
   - Ad-free experience for VIP users
