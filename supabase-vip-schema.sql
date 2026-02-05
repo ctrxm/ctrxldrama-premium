@@ -33,15 +33,16 @@ CREATE POLICY "Users can create subscription requests" ON vip_subscriptions
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Policy: Admins can read all subscriptions (for approval)
+-- Note: This policy checks if the user has admin role in the users table
 CREATE POLICY "Admins can read all subscriptions" ON vip_subscriptions
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id::uuid = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
   );
 
 -- Policy: Admins can update subscriptions (for approval)
 CREATE POLICY "Admins can update subscriptions" ON vip_subscriptions
   FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM users WHERE id::uuid = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
   );
 
 -- Function to check if user is VIP

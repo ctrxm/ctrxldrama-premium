@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageCircle, Layers, User } from "lucide-react";
+import { Home, MessageCircle, Layers, User, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function BottomNav() {
@@ -25,6 +25,13 @@ export function BottomNav() {
       icon: MessageCircle,
       label: "Chat",
       active: pathname === "/chat",
+    },
+    {
+      href: "/vip",
+      icon: Crown,
+      label: "VIP",
+      active: pathname === "/vip",
+      isVip: true,
     },
     {
       href: "/favorites",
@@ -59,12 +66,14 @@ export function BottomNav() {
                 >
                   <div className={`p-2 rounded-xl transition-all ${
                     item.active 
-                      ? "bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30" 
+                      ? (item as any).isVip
+                        ? "bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/30"
+                        : "bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30"
                       : ""
                   }`}>
-                    <Icon className="w-5 h-5" strokeWidth={item.active ? 2.5 : 2} />
+                    <Icon className={`w-5 h-5 ${(item as any).isVip && !item.active ? 'text-amber-400' : ''}`} strokeWidth={item.active ? 2.5 : 2} />
                   </div>
-                  <span className={`text-[10px] font-medium ${item.active ? 'text-white' : ''}`}>
+                  <span className={`text-[10px] font-medium ${item.active ? 'text-white' : (item as any).isVip ? 'text-amber-400' : ''}`}>
                     {item.label}
                   </span>
                 </Link>
