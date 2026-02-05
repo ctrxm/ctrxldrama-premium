@@ -118,6 +118,15 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-05: Added VIP Admin Panel
+  - VIP Management page in admin dashboard (/admin/vip)
+  - Approve/Reject pending VIP subscription requests
+  - Revoke active VIP subscriptions
+  - Filter by status (pending, active, expired, all)
+  - Stats cards showing pending, active VIP, revenue
+  - Payment proof viewer modal
+  - Added VIP link to BottomNav mobile navigation with amber styling
+  - Added admin policy for viewing all users data
 - 2026-02-05: Enhanced VIP Membership System
   - Fixed HD quality gating - non-VIP users can only access SD quality (< 720p)
   - HD quality options show lock icon and redirect to VIP page when clicked
