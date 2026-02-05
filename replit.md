@@ -4,11 +4,11 @@
 A premium streaming platform built with Next.js 16, featuring a corporate editorial UI design with flat aesthetics and an enhanced TikTok-style video player. The app aggregates drama content from multiple sources (DramaBox, ReelShort, NetShort, Melolo, FlickReels, FreeReels).
 
 ## Design Philosophy
-- **Aesthetic**: Corporate editorial/magazine style - clean, minimal, no "AI-detected" looks
-- **Color Palette**: Monochrome (black/white) with red accent (hsl 0, 72%, 51%)
-- **Typography**: DM Sans (body) + Space Grotesk (headings)
-- **Layout**: Grid-based with 1px dividers, zero border radius
-- **Effects**: No gradients, no glassmorphism, minimal shadows, flat design
+- **Aesthetic**: Modern, premium streaming app style - smooth, refined, no "AI-template" looks
+- **Color Palette**: Dark purple/violet theme with gradient accents (violet-500 to purple-600)
+- **Typography**: Plus Jakarta Sans (all text) - clean and modern
+- **Layout**: Card-based with 16px-24px rounded corners, smooth transitions
+- **Effects**: Glass blur backgrounds, subtle gradients, smooth hover animations
 
 ## Project Architecture
 
@@ -109,13 +109,17 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
-- 2026-02-04: Complete UI redesign to corporate editorial style
-  - Updated color scheme to monochrome with red accent
-  - Changed typography to DM Sans + Space Grotesk
-  - Removed all gradients and glassmorphism effects
-  - Redesigned Header, BottomNav, cards, buttons, forms
-  - Updated all pages with consistent flat design
-  - Created custom CSS utility classes for design system
+- 2026-02-05: Complete UI redesign to modern premium streaming style
+  - Updated color scheme to purple/violet with gradient accents
+  - Changed typography to Plus Jakarta Sans for modern look
+  - Added glass blur backgrounds and smooth rounded corners
+  - Redesigned Header with logo from /public/logo.png
+  - Redesigned BottomNav with floating pill style
+  - Redesigned PlatformSelector with horizontal chip style
+  - Enhanced drama cards with premium hover effects
+  - Added description modal to TikTok Player (like popular drama apps)
+  - Preserved auto-scroll functionality in video player
+  - Created custom CSS utility classes (glass-card, platform-chip, etc.)
 - 2026-02-04: Added new user engagement features
   - Favorites/Watchlist system
   - Watch history with resume playback
