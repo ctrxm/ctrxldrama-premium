@@ -75,14 +75,16 @@ export function useVipStatus() {
         .limit(1);
 
       if (error) {
-        if (error.code === 'PGRST205') {
-          setIsVip(false);
-          setSubscription(null);
-          setPendingRequest(null);
-        } else {
-          console.error('Error checking VIP status:', error);
-        }
-      } else if (data && data.length > 0) {
+        console.error('Error checking VIP status:', error);
+        // On any error, default to non-VIP
+        setIsVip(false);
+        setSubscription(null);
+        setPendingRequest(null);
+        setLoading(false);
+        return;
+      }
+      
+      if (data && data.length > 0) {
         const sub = data[0] as VipSubscription;
         
         if (sub.status === 'active') {
@@ -108,9 +110,12 @@ export function useVipStatus() {
         setSubscription(null);
         setPendingRequest(null);
       }
+      setLoading(false);
     } catch (err) {
       console.error('Error checking VIP status:', err);
-    } finally {
+      setIsVip(false);
+      setSubscription(null);
+      setPendingRequest(null);
       setLoading(false);
     }
   }, [user]);

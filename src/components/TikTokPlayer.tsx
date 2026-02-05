@@ -85,6 +85,19 @@ export default function TikTokPlayer({
     };
   }).sort((a, b) => b.quality - a.quality) || [];
 
+  // Debug: Log VIP status and quality options
+  useEffect(() => {
+    if (qualityOptions.length > 0) {
+      console.log('[TikTokPlayer] VIP Status:', isVip);
+      console.log('[TikTokPlayer] Quality options:', qualityOptions.map(q => ({
+        label: q.label,
+        quality: q.quality,
+        isHD: q.isHD,
+        isLocked: q.isLocked
+      })));
+    }
+  }, [isVip, qualityOptions.length]);
+
   const getCurrentVideoUrl = useCallback(() => {
     if (!currentEpisodeData?.videoList?.length) return null;
 
