@@ -7,15 +7,12 @@ import { fetchJson } from "@/lib/fetcher";
 
 const REC_API_BASE = "/api/reelshort";
 
-// Infinite Scroll Hook for DramaBox "Lainnya"
 export function useInfiniteForYouDramas() {
   return useInfiniteQuery({
     queryKey: ["dramas", "foryou", "infinite"],
     queryFn: ({ pageParam = 1 }) => fetchJson<Drama[]>(`${API_BASE}/foryou?page=${pageParam}`),
     initialPageParam: 1,
     getNextPageParam: (lastPage: Drama[], allPages: Drama[][]) => {
-        // Stop if we received no data or less than expected
-        // Also limit to 100 pages as requested
         if (!lastPage || lastPage.length === 0 || allPages.length >= 100) return undefined;
         return allPages.length + 1;
     },
@@ -23,7 +20,6 @@ export function useInfiniteForYouDramas() {
   });
 }
 
-// Infinite Scroll Hook for ReelShort "Lainnya"
 export function useInfiniteReelShortDramas() {
   return useInfiniteQuery({
     queryKey: ["reels", "foryou", "infinite"],
@@ -37,29 +33,30 @@ export function useInfiniteReelShortDramas() {
   });
 }
 
-// ... existing imports
-
-export function useForYouDramas() {
+export function useForYouDramas(enabled = true) {
   return useQuery({
     queryKey: ["dramas", "foryou"],
     queryFn: () => fetchJson<Drama[]>(`${API_BASE}/foryou`),
     staleTime: 1000 * 60 * 5,
+    enabled,
   });
 }
 
-export function useLatestDramas() {
+export function useLatestDramas(enabled = true) {
   return useQuery({
     queryKey: ["dramas", "latest"],
     queryFn: () => fetchJson<Drama[]>(`${API_BASE}/latest`),
     staleTime: 1000 * 60 * 5,
+    enabled,
   });
 }
 
-export function useTrendingDramas() {
+export function useTrendingDramas(enabled = true) {
   return useQuery({
     queryKey: ["dramas", "trending"],
     queryFn: () => fetchJson<Drama[]>(`${API_BASE}/trending`),
     staleTime: 1000 * 60 * 5,
+    enabled,
   });
 }
 
@@ -77,11 +74,11 @@ export function useSearchDramas(query: string) {
   });
 }
 
-export function useDubindoDramas() {
+export function useDubindoDramas(enabled = true) {
   return useQuery({
     queryKey: ["dramas", "dubindo"],
     queryFn: () => fetchJson<Drama[]>(`${API_BASE}/dubindo`),
     staleTime: 1000 * 60 * 5,
+    enabled,
   });
 }
-

@@ -1,15 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, lazy, Suspense } from "react";
 import { PlatformSelector } from "@/components/PlatformSelector";
 import { DramaSection } from "@/components/DramaSection";
-import { ReelShortSection } from "@/components/ReelShortSection";
-import { NetShortHome } from "@/components/NetShortHome";
-import { MeloloHome } from "@/components/MeloloHome";
-import { FlickReelsHome } from "@/components/FlickReelsHome";
-import { FreeReelsHome } from "@/components/FreeReelsHome";
 import { HeroCarousel } from "@/components/HeroCarousel";
-import { InfiniteDramaSection } from "@/components/InfiniteDramaSection";
 import { ContinueWatchingSection } from "@/components/ContinueWatchingSection";
 import { RecommendationsSection } from "@/components/RecommendationsSection";
 import { RecentlyAddedSection } from "@/components/RecentlyAddedSection";
@@ -18,13 +12,35 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { useForYouDramas, useLatestDramas, useTrendingDramas, useDubindoDramas } from "@/hooks/useDramas";
 import { usePlatform } from "@/hooks/usePlatform";
 
+const ReelShortSection = lazy(() => import("@/components/ReelShortSection").then(m => ({ default: m.ReelShortSection })));
+const NetShortHome = lazy(() => import("@/components/NetShortHome").then(m => ({ default: m.NetShortHome })));
+const MeloloHome = lazy(() => import("@/components/MeloloHome").then(m => ({ default: m.MeloloHome })));
+const FlickReelsHome = lazy(() => import("@/components/FlickReelsHome").then(m => ({ default: m.FlickReelsHome })));
+const FreeReelsHome = lazy(() => import("@/components/FreeReelsHome").then(m => ({ default: m.FreeReelsHome })));
+const InfiniteDramaSection = lazy(() => import("@/components/InfiniteDramaSection").then(m => ({ default: m.InfiniteDramaSection })));
+
+function PlatformSkeleton() {
+  return (
+    <div className="py-6 space-y-6">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i}>
+            <div className="aspect-[3/4] rounded-xl bg-muted/30 animate-pulse mb-2" />
+            <div className="h-4 w-3/4 bg-muted/20 rounded animate-pulse" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HomeContent() {
   const { isDramaBox, isReelShort, isNetShort, isMelolo, isFlickReels, isFreeReels } = usePlatform();
 
-  const { data: popularDramas, isLoading: loadingPopular, error: errorPopular, refetch: refetchPopular } = useForYouDramas();
-  const { data: latestDramas, isLoading: loadingLatest, error: errorLatest, refetch: refetchLatest } = useLatestDramas();
-  const { data: trendingDramas, isLoading: loadingTrending, error: errorTrending, refetch: refetchTrending } = useTrendingDramas();
-  const { data: dubindoDramas, isLoading: loadingDubindo, error: errorDubindo, refetch: refetchDubindo } = useDubindoDramas();
+  const { data: popularDramas, isLoading: loadingPopular, error: errorPopular, refetch: refetchPopular } = useForYouDramas(isDramaBox);
+  const { data: latestDramas, isLoading: loadingLatest, error: errorLatest, refetch: refetchLatest } = useLatestDramas(isDramaBox);
+  const { data: trendingDramas, isLoading: loadingTrending, error: errorTrending, refetch: refetchTrending } = useTrendingDramas(isDramaBox);
+  const { data: dubindoDramas, isLoading: loadingDubindo, error: errorDubindo, refetch: refetchDubindo } = useDubindoDramas(isDramaBox);
 
   const handleRefresh = useCallback(async () => {
     await Promise.all([
@@ -89,38 +105,50 @@ export default function HomeContent() {
 
             <RecommendationsSection limit={10} />
 
-            <InfiniteDramaSection title="Discover More" />
+            <Suspense fallback={<PlatformSkeleton />}>
+              <InfiniteDramaSection title="Discover More" />
+            </Suspense>
           </div>
         </PullToRefresh>
       )}
 
       {isReelShort && (
         <div className="container-main py-6 space-y-10">
-          <ReelShortSection />
+          <Suspense fallback={<PlatformSkeleton />}>
+            <ReelShortSection />
+          </Suspense>
         </div>
       )}
 
       {isNetShort && (
         <div className="container-main py-6 space-y-10">
-          <NetShortHome />
+          <Suspense fallback={<PlatformSkeleton />}>
+            <NetShortHome />
+          </Suspense>
         </div>
       )}
 
       {isMelolo && (
         <div className="container-main py-6 space-y-10">
-          <MeloloHome />
+          <Suspense fallback={<PlatformSkeleton />}>
+            <MeloloHome />
+          </Suspense>
         </div>
       )}
 
       {isFlickReels && (
         <div className="container-main py-6 space-y-10">
-          <FlickReelsHome />
+          <Suspense fallback={<PlatformSkeleton />}>
+            <FlickReelsHome />
+          </Suspense>
         </div>
       )}
 
       {isFreeReels && (
         <div className="container-main py-6 space-y-10">
-          <FreeReelsHome />
+          <Suspense fallback={<PlatformSkeleton />}>
+            <FreeReelsHome />
+          </Suspense>
         </div>
       )}
     </main>

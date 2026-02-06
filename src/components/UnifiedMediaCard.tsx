@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Play } from "lucide-react";
+import { optimizeCover } from "@/lib/image";
 
 export interface BadgeConfig {
   text: string;
@@ -30,15 +31,16 @@ export function UnifiedMediaCard({
   index = 0,
 }: UnifiedMediaCardProps) {
   return (
-    <Link href={link} className="group block">
+    <Link href={link} prefetch={false} className="group block">
       <div className="relative aspect-poster rounded-xl overflow-hidden bg-card poster-shadow">
         <img
-          src={cover.includes(".heic") 
-            ? `https://wsrv.nl/?url=${encodeURIComponent(cover)}&output=jpg` 
-            : cover}
+          src={optimizeCover(cover)}
           alt={title}
+          width={200}
+          height={267}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
+          loading={index < 8 ? "eager" : "lazy"}
+          decoding="async"
           referrerPolicy="no-referrer"
         />
 

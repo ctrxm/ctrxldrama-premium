@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
-import { AdsDisplay } from "@/components/AdsDisplay";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Suspense } from "react";
+import { LazyAds } from "@/components/LazyAds";
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "CTRXL DRAMA - Streaming Drama Pendek",
@@ -20,12 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="id" suppressHydrationWarning className={plusJakarta.variable}>
       <body className="font-sans antialiased">
         <Providers>
           <Suspense fallback={<div className="h-16" />}>
@@ -36,8 +38,7 @@ export default function RootLayout({
           </div>
           <Footer />
           <BottomNav />
-          <AdsDisplay position="popup" />
-          <AdsDisplay position="bottom" />
+          <LazyAds />
           <Toaster />
           <Sonner />
         </Providers>

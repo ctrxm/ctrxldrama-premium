@@ -119,6 +119,16 @@ npm run deploy:cloudflare
 - Configuration in `wrangler.toml` and `open-next.config.ts`
 
 ## Recent Changes
+- 2026-02-06: Performance Optimizations
+  - Conditional data fetching: DramaBox API calls only fire when DramaBox platform is active
+  - Dynamic imports (React.lazy) for platform-specific sections (ReelShort, NetShort, Melolo, FlickReels, FreeReels)
+  - QueryClient optimized: gcTime 30min, exponential retry backoff, data persists longer in cache
+  - Removed force-dynamic from home page for better static caching
+  - Removed cache: 'no-store' from API fetcher to allow HTTP caching
+  - Font loading optimized with next/font/google (Plus Jakarta Sans) instead of CSS @import
+  - AdsDisplay lazy loaded with 3-second delay to prioritize content
+  - Image optimization helper for .heic cover images via wsrv.nl
+  - First 8 drama cards load eagerly, rest use lazy loading
 - 2026-02-05: Unified Video Player across all providers
   - Created UniversalPlayer component with DramaBox-style UI
   - All providers now use the same player design (ReelShort, NetShort, Melolo, FlickReels, FreeReels)

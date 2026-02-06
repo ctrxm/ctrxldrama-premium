@@ -14,9 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         queryCache: new QueryCache({
           onError: (error: any) => {
-            // Handle API errors gracefully without rate limiting
             if (error instanceof ApiError) {
-              // Only show user-friendly errors, not rate limit errors
               if (error.status >= 500) {
                 toast.error("Server Error", {
                   description: "The server is temporarily unavailable. Please try again later.",
@@ -28,24 +26,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   duration: 4000,
                 });
               }
-              // Don't show toast for other errors (like 429) - let them pass silently
             }
           },
         }),
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            refetchOnWindowFocus: false, // Disable auto refresh on focus
-            refetchOnMount: false, // Disable auto refresh on mount
-            refetchOnReconnect: false, // Disable auto refresh on network reconnect
+            staleTime: 5 * 60 * 1000,
+            gcTime: 30 * 60 * 1000,
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
+            refetchOnReconnect: false,
             retry: (failureCount, error) => {
-              // Don't retry on 404 or client errors
               if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
                 return false;
               }
-              // Retry up to 2 times for server errors
               return failureCount < 2;
             },
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
           },
         },
       })
