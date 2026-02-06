@@ -59,7 +59,6 @@ src/
 7. **Trending** - View trending dramas based on views and favorites
 8. **Recommendations** - Personalized recommendations based on watch history
 9. **Community Chat** - Real-time chat for all users (view), registered users can send messages
-10. **VIP Membership** - Premium subscription with ad-free experience, HD quality, VIP badge
 
 ### Database Schema
 Tables in `supabase-features-schema.sql`:
@@ -74,9 +73,6 @@ Tables in `supabase-features-schema.sql`:
 
 Tables in `supabase-chat-schema.sql`:
 - `chat_messages` - Community chat messages with real-time sync
-
-Tables in `supabase-vip-schema.sql`:
-- `vip_subscriptions` - VIP membership subscriptions with payment tracking
 
 ### Environment Variables
 Required environment variables (stored in `.env.local`):
@@ -129,35 +125,21 @@ npm run deploy:cloudflare
   - AdsDisplay lazy loaded with 3-second delay to prioritize content
   - Image optimization helper for .heic cover images via wsrv.nl
   - First 8 drama cards load eagerly, rest use lazy loading
+- 2026-02-06: Removed VIP Membership System
+  - Removed VIP page, admin VIP panel, VipBadge component, useVipStatus hook
+  - Removed VIP link from Header and BottomNav navigation
+  - Removed HD quality gating (all qualities now freely accessible)
+  - Removed VIP badge from chat messages
+  - Removed VIP-conditional ad skipping from AdsDisplay
+  - All video quality options (including HD) now available to all users
 - 2026-02-05: Unified Video Player across all providers
   - Created UniversalPlayer component with DramaBox-style UI
   - All providers now use the same player design (ReelShort, NetShort, Melolo, FlickReels, FreeReels)
   - Custom controls: play/pause, mute, quality selector, speed control, episode navigation
-  - HD quality gating with VIP lock icons
   - Episode list modal with grid layout
   - Description modal for drama info
   - Support for both HLS streams and direct MP4 URLs
   - Keyboard shortcuts (space, m, arrow up/down)
-- 2026-02-05: Added VIP Admin Panel
-  - VIP Management page in admin dashboard (/admin/vip)
-  - Approve/Reject pending VIP subscription requests
-  - Revoke active VIP subscriptions
-  - Filter by status (pending, active, expired, all)
-  - Stats cards showing pending, active VIP, revenue
-  - Payment proof viewer modal
-  - Added VIP link to BottomNav mobile navigation with amber styling
-  - Added admin policy for viewing all users data
-- 2026-02-05: Enhanced VIP Membership System
-  - Fixed HD quality gating - non-VIP users can only access SD quality (< 720p)
-  - HD quality options show lock icon and redirect to VIP page when clicked
-  - Auto mode now selects from available (non-HD) videos for non-VIP users
-  - Optimized ads loading - VIP users skip ad fetching entirely
-  - VIP badge in chat uses actual VIP status from database
-- 2026-02-05: Added VIP Membership System
-  - VIP subscription page with QRIS payment
-  - Ad-free experience for VIP users
-  - VIP badge in chat messages
-  - Monthly, yearly, and lifetime plans
 - 2026-02-05: Replaced Browse with Community Chat feature
   - Real-time chat using Supabase realtime subscriptions
   - All users can view messages

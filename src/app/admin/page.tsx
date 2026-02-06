@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Users, Eye, Film, Activity, RefreshCw, Crown } from 'lucide-react';
+import { Loader2, Users, Eye, Film, Activity, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Statistics {
@@ -248,19 +248,6 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <button
-            onClick={() => router.push('/admin/vip')}
-            className="card-corporate p-4 md:p-6 hover:border-amber-500/50 transition-colors text-left border-amber-500/20"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Crown className="w-5 h-5 text-amber-400" />
-              <h3 className="text-base md:text-lg font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">VIP Management</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Approve or reject VIP subscription requests
-            </p>
-          </button>
-
           <button
             onClick={() => router.push('/admin/ads')}
             className="card-corporate p-4 md:p-6 hover:border-primary/50 transition-colors text-left"

@@ -5,10 +5,9 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useDramaDetail, useEpisodes } from "@/hooks/useDramaDetail";
 import { 
   ArrowLeft, ChevronUp, ChevronDown, Loader2, Settings, List, 
-  AlertCircle, Play, Pause, Volume2, VolumeX, X, Lock, Crown
+  AlertCircle, Play, Pause, Volume2, VolumeX, X
 } from "lucide-react";
 import Link from "next/link";
-import { useVipStatus } from "@/hooks/useVipStatus";
 import type { DramaDetailDirect, DramaDetailResponseLegacy } from "@/types/drama";
 
 function isDirectFormat(data: unknown): data is DramaDetailDirect {
@@ -24,7 +23,6 @@ export default function DramaBoxWatchPage() {
   const bookId = params.bookId;
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isVip } = useVipStatus();
   const [currentEpisode, setCurrentEpisode] = useState(0);
   const [quality, setQuality] = useState(720);
   
@@ -102,22 +100,10 @@ export default function DramaBoxWatchPage() {
   useEffect(() => {
     if (!availableQualities.length) return;
     
-    // For non-VIP, select the highest SD quality by default
-    if (!isVip) {
-      const sdQualities = availableQualities.filter(q => q < HD_QUALITY_THRESHOLD);
-      if (sdQualities.length > 0) {
-        const bestSD = Math.max(...sdQualities);
-        if (quality >= HD_QUALITY_THRESHOLD || !availableQualities.includes(quality)) {
-          setQuality(bestSD);
-        }
-      } else if (!availableQualities.includes(quality)) {
-        // No SD available, but user can't select HD without VIP
-        setQuality(availableQualities[availableQualities.length - 1]);
-      }
-    } else if (!availableQualities.includes(quality)) {
+    if (!availableQualities.includes(quality)) {
       setQuality(availableQualities[0]);
     }
-  }, [availableQualities, quality, isVip]);
+  }, [availableQualities, quality]);
 
   const getVideoUrl = () => {
     if (!currentEpisodeData || !defaultCdn) return "";
@@ -311,46 +297,28 @@ export default function DramaBoxWatchPage() {
                     <div className="absolute right-0 top-full mt-2 bg-black/90 backdrop-blur-xl rounded-xl border border-white/10 z-50 min-w-[140px] overflow-hidden">
                       {availableQualities.map((q) => {
                         const isHD = q >= HD_QUALITY_THRESHOLD;
-                        const isLocked = isHD && !isVip;
                         return (
                           <button
                             key={q}
                             onClick={() => { 
-                              if (isLocked) {
-                                router.push('/vip');
-                              } else {
-                                setQuality(q); 
-                                setShowQualityMenu(false); 
-                              }
+                              setQuality(q); 
+                              setShowQualityMenu(false); 
                             }}
                             className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between ${
-                              isLocked ? 'text-gray-500' : 
                               quality === q ? 'text-violet-400 bg-white/5' : 'text-white'
                             } hover:bg-white/10 transition-colors`}
                           >
                             <span className="flex items-center gap-2">
                               {q}p
                               {isHD && (
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded ${isLocked ? 'bg-gray-600 text-gray-400' : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white'} font-bold`}>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">
                                   HD
                                 </span>
                               )}
                             </span>
-                            {isLocked && (
-                              <Lock className="w-3.5 h-3.5 text-gray-500" />
-                            )}
                           </button>
                         );
                       })}
-                      {!isVip && (
-                        <Link
-                          href="/vip"
-                          className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 text-amber-400 hover:bg-white/10 transition-colors border-t border-white/10"
-                        >
-                          <Crown className="w-4 h-4" />
-                          <span>Unlock HD</span>
-                        </Link>
-                      )}
                     </div>
                   </>
                 )}

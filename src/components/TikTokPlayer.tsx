@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX, Info, X, Gauge, PictureInPicture2, Crown, Lock } from "lucide-react";
+import { ChevronLeft, Settings, List, Play, Pause, ChevronUp, ChevronDown, Volume2, VolumeX, Info, X, Gauge, PictureInPicture2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Hls from "hls.js";
-import { useVipStatus } from "@/hooks/useVipStatus";
 
 interface VideoItem {
   url: string;
@@ -41,7 +40,6 @@ export default function TikTokPlayer({
   onEpisodeChange,
   onShowEpisodeList,
 }: TikTokPlayerProps) {
-  const { isVip } = useVipStatus();
   const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -74,51 +72,30 @@ export default function TikTokPlayer({
     const qualityValue = video.quality === 0 ? 1080 : video.quality;
     const qualityLabel = video.quality === 0 ? "1080p" : `${video.quality}p`;
     const isHD = qualityValue >= HD_QUALITY_THRESHOLD;
-    const isLocked = isHD && !isVip;
     return {
       id: `${video.encode}-${video.quality}-${index}`,
       label: `${qualityLabel} (${video.encode})`,
       quality: qualityValue,
       isHD,
-      isLocked,
       video,
     };
   }).sort((a, b) => b.quality - a.quality) || [];
 
-  // Debug: Log VIP status and quality options
-  useEffect(() => {
-    if (qualityOptions.length > 0) {
-      console.log('[TikTokPlayer] VIP Status:', isVip);
-      console.log('[TikTokPlayer] Quality options:', qualityOptions.map(q => ({
-        label: q.label,
-        quality: q.quality,
-        isHD: q.isHD,
-        isLocked: q.isLocked
-      })));
-    }
-  }, [isVip, qualityOptions.length]);
-
   const getCurrentVideoUrl = useCallback(() => {
     if (!currentEpisodeData?.videoList?.length) return null;
 
-    const availableVideos = currentEpisodeData.videoList.filter((v) => {
-      const qualityValue = v.quality === 0 ? 1080 : v.quality;
-      const isHD = qualityValue >= HD_QUALITY_THRESHOLD;
-      return !isHD || isVip;
-    });
-
     if (selectedQuality === "auto" || !qualityOptions.length) {
-      const h264Video = availableVideos.find((v) => v.encode === "H264");
-      return h264Video || availableVideos[0] || currentEpisodeData.videoList[currentEpisodeData.videoList.length - 1];
+      const h264Video = currentEpisodeData.videoList.find((v) => v.encode === "H264");
+      return h264Video || currentEpisodeData.videoList[0];
     }
 
-    const selected = qualityOptions.find((q) => q.id === selectedQuality && !q.isLocked);
+    const selected = qualityOptions.find((q) => q.id === selectedQuality);
     if (selected) {
       return selected.video;
     }
     
-    return availableVideos[0] || currentEpisodeData.videoList[currentEpisodeData.videoList.length - 1];
-  }, [currentEpisodeData, selectedQuality, qualityOptions, isVip]);
+    return currentEpisodeData.videoList[0];
+  }, [currentEpisodeData, selectedQuality, qualityOptions]);
 
   const loadVideo = useCallback((videoUrl: string) => {
     if (!videoRef.current) return;
@@ -388,29 +365,21 @@ export default function TikTokPlayer({
                       <button
                         key={option.id}
                         onClick={() => { 
-                          if (option.isLocked) {
-                            window.location.href = '/vip';
-                          } else {
-                            setSelectedQuality(option.id); 
-                            setShowQualityMenu(false); 
-                          }
+                          setSelectedQuality(option.id); 
+                          setShowQualityMenu(false); 
                         }}
                         className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between ${
-                          option.isLocked ? 'text-gray-500' : 
                           selectedQuality === option.id ? 'text-violet-400 bg-white/5' : 'text-white'
                         } hover:bg-white/10 transition-colors`}
                       >
                         <span className="flex items-center gap-2">
                           {option.label}
                           {option.isHD && (
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${option.isLocked ? 'bg-gray-600 text-gray-400' : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white'} font-bold`}>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">
                               HD
                             </span>
                           )}
                         </span>
-                        {option.isLocked && (
-                          <Lock className="w-3.5 h-3.5 text-gray-500" />
-                        )}
                       </button>
                     ))}
                   </div>
