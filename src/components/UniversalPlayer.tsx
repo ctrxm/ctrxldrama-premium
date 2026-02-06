@@ -4,12 +4,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, ChevronUp, ChevronDown, Settings, List, 
-  Play, Pause, Volume2, VolumeX, X, Lock, Crown, Loader2, Gauge
+  Play, Pause, Volume2, VolumeX, X, Loader2, Gauge
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Hls from "hls.js";
-import { useVipStatus } from "@/hooks/useVipStatus";
 
 export interface VideoQuality {
   id: string;
@@ -53,7 +52,6 @@ export default function UniversalPlayer({
   detailPath,
 }: UniversalPlayerProps) {
   const router = useRouter();
-  const { isVip } = useVipStatus();
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -80,31 +78,26 @@ export default function UniversalPlayer({
     if (!currentEpisode?.videoQualities?.length) return [];
     
     const allQualities = currentEpisode.videoQualities;
-    const hasNonHdOptions = allQualities.some(q => q.quality < HD_QUALITY_THRESHOLD);
     
     return allQualities
       .map((q) => {
         const isHD = q.quality >= HD_QUALITY_THRESHOLD;
-        const isLocked = isHD && !isVip && hasNonHdOptions;
         return {
           ...q,
           isHD,
-          isLocked,
         };
       })
       .sort((a, b) => b.quality - a.quality);
-  }, [currentEpisode, isVip]);
+  }, [currentEpisode]);
 
   const getCurrentVideo = useCallback((): { url: string; isHls: boolean } | null => {
     if (!currentEpisode?.videoQualities?.length) return null;
 
-    const availableQualities = qualityOptions.filter(q => !q.isLocked);
-    
     let selectedQ = null;
     if (selectedQualityId === "auto" || !qualityOptions.length) {
-      selectedQ = availableQualities.find(q => q.isDefault) || availableQualities[0];
+      selectedQ = qualityOptions.find(q => q.isDefault) || qualityOptions[0];
     } else {
-      selectedQ = qualityOptions.find(q => q.id === selectedQualityId && !q.isLocked) || availableQualities[0];
+      selectedQ = qualityOptions.find(q => q.id === selectedQualityId) || qualityOptions[0];
     }
     
     if (!selectedQ) return null;
@@ -427,40 +420,23 @@ export default function UniversalPlayer({
                         <button
                           key={q.id}
                           onClick={() => { 
-                            if (q.isLocked) {
-                              router.push('/vip');
-                            } else {
-                              setSelectedQualityId(q.id); 
-                              setShowQualityMenu(false); 
-                            }
+                            setSelectedQualityId(q.id); 
+                            setShowQualityMenu(false); 
                           }}
                           className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between ${
-                            q.isLocked ? 'text-gray-500' : 
                             selectedQualityId === q.id ? 'text-violet-400 bg-white/5' : 'text-white'
                           } hover:bg-white/10 transition-colors`}
                         >
                           <span className="flex items-center gap-2">
                             {q.label}
                             {q.isHD && (
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded ${q.isLocked ? 'bg-gray-600 text-gray-400' : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white'} font-bold`}>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">
                                 HD
                               </span>
                             )}
                           </span>
-                          {q.isLocked && (
-                            <Lock className="w-3.5 h-3.5 text-gray-500" />
-                          )}
                         </button>
                       ))}
-                      {!isVip && (
-                        <Link
-                          href="/vip"
-                          className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 text-amber-400 hover:bg-white/10 transition-colors border-t border-white/10"
-                        >
-                          <Crown className="w-4 h-4" />
-                          <span>Unlock HD</span>
-                        </Link>
-                      )}
                     </div>
                   </>
                 )}

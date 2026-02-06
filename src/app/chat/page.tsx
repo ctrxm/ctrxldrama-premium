@@ -1,22 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, Loader2, Trash2, LogIn, Crown } from 'lucide-react';
+import { MessageCircle, Send, Loader2, Trash2, LogIn } from 'lucide-react';
 import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
-import { useVipStatus } from '@/hooks/useVipStatus';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 
 function MessageBubble({ 
   message, 
   isOwn,
-  isVip,
   onDelete 
 }: { 
   message: ChatMessage; 
   isOwn: boolean;
-  isVip?: boolean;
   onDelete?: () => void;
 }) {
   const timeAgo = formatDistanceToNow(new Date(message.created_at), { addSuffix: true });
@@ -25,15 +22,9 @@ function MessageBubble({
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3`}>
       <div className={`max-w-[80%] sm:max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
         <div className={`flex items-center gap-2 mb-1 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-          <span className={`text-xs font-medium ${isVip ? 'text-amber-400' : 'text-violet-400'}`}>
+          <span className="text-xs font-medium text-violet-400">
             {message.user_name || message.user_email.split('@')[0]}
           </span>
-          {isVip && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] px-1 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">
-              <Crown className="w-2 h-2" />
-              VIP
-            </span>
-          )}
           <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
           {isOwn && onDelete && (
             <button
@@ -60,7 +51,6 @@ function MessageBubble({
 
 export default function ChatPage() {
   const { user } = useAuth();
-  const { isVip: currentUserIsVip } = useVipStatus();
   const { messages, loading, sending, error, sendMessage, deleteMessage } = useChat();
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -145,7 +135,6 @@ export default function ChatPage() {
                     key={msg.id}
                     message={msg}
                     isOwn={user?.id === msg.user_id}
-                    isVip={user?.id === msg.user_id ? currentUserIsVip : false}
                     onDelete={user?.id === msg.user_id ? () => deleteMessage(msg.id) : undefined}
                   />
                 ))}
