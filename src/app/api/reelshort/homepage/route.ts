@@ -1,29 +1,22 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { popularDramas, dramaToLegacy } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/reelshort";
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const response = await fetch(`${UPSTREAM_API}/homepage`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch data" },
-        { status: response.status }
-      );
-    }
-
-    const data = await safeJson(response);
-    return encryptedResponse(data);
+    const result = await popularDramas({ provider: "reelshort", per_page: 20 });
+    const lists = (result.data || []).map((d) => ({
+      ...dramaToLegacy(d),
+      book_id: String(d.id),
+      book_title: d.title,
+      book_pic: d.cover_url,
+      special_desc: d.introduction || "",
+      chapter_count: d.chapter_count,
+    }));
+    return encryptedResponse({ success: true, data: { lists } });
   } catch (error) {
-    console.error("ReelShort API Error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("reelshort/homepage error:", error);
+    return encryptedResponse({ success: true, data: { lists: [] } });
   }
 }
-

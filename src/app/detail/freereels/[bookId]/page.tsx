@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnifiedErrorDisplay } from "@/components/UnifiedErrorDisplay";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
-import { SubscribeButton } from "@/components/SubscribeButton";
 import { RatingStars } from "@/components/RatingStars";
 import { CommentsSection } from "@/components/CommentsSection";
 import { ReviewsList } from "@/components/ReviewsList";
@@ -95,11 +94,6 @@ export default function FreeReelsDetailPage() {
                   drama_cover={drama.cover}
                 />
                 <ShareButton title={drama.title} description={drama.desc?.slice(0, 100)} />
-                <SubscribeButton
-                  drama_id={bookId}
-                  platform="freereels"
-                  drama_title={drama.title}
-                />
               </div>
             </div>
 

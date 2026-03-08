@@ -1,42 +1,28 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { getDrama } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/reelshort";
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const bookId = request.nextUrl.searchParams.get("bookId");
+  if (!bookId) return encryptedResponse({ error: "bookId is required" }, 400);
+
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const bookId = searchParams.get("bookId");
+    const result = await getDrama(bookId);
+    const drama = result.data?.drama;
+    if (!drama) return encryptedResponse({ error: "Not found" }, 404);
 
-    if (!bookId) {
-      return encryptedResponse(
-        { error: "bookId is required" },
-        400
-      );
-    }
-
-    const response = await fetch(
-      `${UPSTREAM_API}/detail?bookId=${encodeURIComponent(bookId)}`,
-      {
-        cache: 'no-store',
-      }
-    );
-
-    if (!response.ok) {
-      return encryptedResponse(
-        { error: "Failed to fetch detail" },
-        response.status
-      );
-    }
-
-    const data = await safeJson(response);
-    return encryptedResponse(data);
+    return encryptedResponse({
+      success: true,
+      bookId: String(drama.id),
+      title: drama.title,
+      cover: drama.cover_url,
+      description: drama.introduction || "",
+      totalEpisodes: drama.chapter_count,
+    });
   } catch (error) {
-    console.error("ReelShort Detail Error:", error);
-    return encryptedResponse(
-      { error: "Internal Server Error" },
-      500
-    );
+    console.error("reelshort/detail error:", error);
+    return encryptedResponse({ error: "Internal Server Error" }, 500);
   }
 }
-

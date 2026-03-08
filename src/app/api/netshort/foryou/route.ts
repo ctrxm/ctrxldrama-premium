@@ -1,43 +1,25 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { listDramas } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/netshort";
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const page = searchParams.get("page") || "1";
-
-    const response = await fetch(`${UPSTREAM_API}/foryou?page=${page}`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return encryptedResponse({ success: false, data: [] });
-    }
-
-    const data = await safeJson<any>(response);
-    
-    // Normalize the response
-    const dramas = (data.contentInfos || []).map((item: any) => ({
-      shortPlayId: item.shortPlayId,
-      shortPlayLibraryId: item.shortPlayLibraryId,
-      title: item.shortPlayName,
-      cover: item.shortPlayCover,
-      labels: item.labelArray || [],
-      heatScore: item.heatScoreShow || "",
-      scriptName: item.scriptName,
+    const page = parseInt(request.nextUrl.searchParams.get("page") || "1");
+    const result = await listDramas({ provider: "netshort", page, per_page: 20 });
+    const data = (result.data || []).map((d) => ({
+      shortPlayId: String(d.id),
+      shortPlayLibraryId: String(d.external_id || d.id),
+      title: d.title,
+      cover: d.cover_url,
+      labels: [],
+      heatScore: "",
+      scriptName: "",
     }));
-
-    return encryptedResponse({
-      success: true,
-      data: dramas,
-      maxOffset: data.maxOffset,
-      completed: data.completed,
-    });
+    return encryptedResponse({ success: true, data });
   } catch (error) {
-    console.error("NetShort ForYou Error:", error);
+    console.error("netshort/foryou error:", error);
     return encryptedResponse({ success: false, data: [] });
   }
 }
-

@@ -1,23 +1,24 @@
-import { encryptedResponse, safeJson } from "@/lib/api-utils";
-import { NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { popularDramas } from "@/lib/sdrama";
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api"}/flickreels/hotrank`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 3600 }
+    const result = await popularDramas({ provider: "flickreels", per_page: 20 });
+    const dramas = (result.data || []).map((d) => ({
+      playlet_id: d.id,
+      title: d.title,
+      cover: d.cover_url,
+      introduce: d.introduction || "",
+    }));
+    return encryptedResponse({
+      status_code: 1,
+      msg: "ok",
+      data: [{ name: "Popular", rank_type: 1, data: dramas }],
     });
-
-    if (!res.ok) {
-        return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
-    }
-
-    const data = await safeJson(res);
-    return encryptedResponse(data);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    console.error("flickreels/hotrank error:", error);
+    return encryptedResponse({ status_code: 0, msg: "error", data: [] });
   }
 }

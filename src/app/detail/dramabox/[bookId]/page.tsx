@@ -8,7 +8,6 @@ import { useRouter, useParams } from "next/navigation";
 import type { DramaDetailDirect, DramaDetailResponseLegacy } from "@/types/drama";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
-import { SubscribeButton } from "@/components/SubscribeButton";
 import { RatingStars } from "@/components/RatingStars";
 import { CommentsSection } from "@/components/CommentsSection";
 import { ReviewsList } from "@/components/ReviewsList";
@@ -111,11 +110,6 @@ export default function DramaBoxDetailPage() {
                     drama_genre={book.tags?.[0]}
                   />
                   <ShareButton title={book.bookName} description={book.introduction?.slice(0, 100)} />
-                  <SubscribeButton
-                    drama_id={book.bookId}
-                    platform="dramabox"
-                    drama_title={book.bookName}
-                  />
                 </div>
               </div>
 

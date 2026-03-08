@@ -10,7 +10,6 @@ import { UnifiedErrorDisplay } from "@/components/UnifiedErrorDisplay";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
-import { SubscribeButton } from "@/components/SubscribeButton";
 import { RatingStars } from "@/components/RatingStars";
 import { CommentsSection } from "@/components/CommentsSection";
 import { ReviewsList } from "@/components/ReviewsList";
@@ -93,11 +92,6 @@ export default function FlickReelsDetailPage() {
                   drama_cover={drama.cover}
                 />
                 <ShareButton title={drama.title} description={drama.description?.slice(0, 100)} />
-                <SubscribeButton
-                  drama_id={bookId}
-                  platform="flickreels"
-                  drama_title={drama.title}
-                />
               </div>
             </div>
 

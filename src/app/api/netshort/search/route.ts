@@ -1,50 +1,25 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { searchDramas } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/netshort";
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const query = request.nextUrl.searchParams.get("query");
+  if (!query) return encryptedResponse({ success: true, data: [] });
+
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const query = searchParams.get("query");
-
-    if (!query) {
-      return encryptedResponse({ success: true, data: [] });
-    }
-
-    const response = await fetch(
-      `${UPSTREAM_API}/search?query=${encodeURIComponent(query)}`,
-      {
-        cache: 'no-store',}
-    );
-
-    if (!response.ok) {
-      return encryptedResponse({ success: true, data: [] });
-    }
-
-    const data = await safeJson<any>(response);
-    
-    // Search results are in searchCodeSearchResult array
-    const results = data.searchCodeSearchResult || [];
-    
-    const normalizedResults = results.map((item: any) => ({
-      shortPlayId: item.shortPlayId,
-      shortPlayLibraryId: item.shortPlayLibraryId,
-      // Remove <em> tags from title
-      title: (item.shortPlayName || "").replace(/<\/?em>/g, ""),
-      cover: item.shortPlayCover,
-      labels: item.labelNameList || [],
-      heatScore: item.formatHeatScore || "",
-      description: item.shotIntroduce,
+    const result = await searchDramas({ q: query, provider: "netshort" });
+    const data = (result.data || []).map((d) => ({
+      shortPlayId: String(d.id),
+      shortPlayLibraryId: String(d.external_id || d.id),
+      title: d.title,
+      cover: d.cover_url,
+      labels: [],
     }));
-
-    return encryptedResponse({
-      success: true,
-      data: normalizedResults,
-    });
+    return encryptedResponse({ success: true, data });
   } catch (error) {
-    console.error("NetShort Search Error:", error);
+    console.error("netshort/search error:", error);
     return encryptedResponse({ success: true, data: [] });
   }
 }
-

@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
-import { SubscribeButton } from "@/components/SubscribeButton";
 import { RatingStars } from "@/components/RatingStars";
 import { CommentsSection } from "@/components/CommentsSection";
 import { ReviewsList } from "@/components/ReviewsList";
@@ -95,11 +94,6 @@ export default function MeloloDetailPage() {
                   drama_cover={drama.series_cover}
                 />
                 <ShareButton title={drama.series_title} description={drama.series_intro?.slice(0, 100)} />
-                <SubscribeButton
-                  drama_id={params.bookId}
-                  platform="melolo"
-                  drama_title={drama.series_title}
-                />
               </div>
             </div>
 

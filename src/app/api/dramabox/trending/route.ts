@@ -1,34 +1,15 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { popularDramas, dramaToLegacy } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/dramabox";
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const response = await fetch(`${UPSTREAM_API}/trending`, {
-      cache: 'no-store',});
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch data" },
-        { status: response.status }
-      );
-    }
-
-    const data = await safeJson(response);
-    
-    // Filter out items without bookId or bookName to prevent blank cards
-    const filteredData = Array.isArray(data) 
-      ? data.filter((item: any) => item && item.bookId) 
-      : [];
-
-    return encryptedResponse(filteredData);
+    const result = await popularDramas({ provider: "dramabox", per_page: 20 });
+    const dramas = (result.data || []).map(dramaToLegacy);
+    return encryptedResponse(dramas);
   } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("dramabox/trending error:", error);
+    return encryptedResponse([]);
   }
 }
-

@@ -160,14 +160,6 @@ export function EnhancedDramaCard({ drama, platform = 'dramabox', showAnimation 
           )}
         </div>
 
-        {/* VIP Badge */}
-        {drama.isVip && (
-          <div className="absolute top-2 left-2">
-            <div className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold rounded shadow-lg">
-              ⭐ VIP
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Title */}

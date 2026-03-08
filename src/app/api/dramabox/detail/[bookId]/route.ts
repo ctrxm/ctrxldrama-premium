@@ -1,39 +1,35 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { getDrama } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/dramabox";
+export const dynamic = 'force-dynamic';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ bookId: string }> }
 ) {
   const { bookId } = await params;
-  const headersList = await headers();
-  const accept = headersList.get("accept") || "";
 
-
-
-  // If API fetch -> proxy to upstream
   try {
-    const response = await fetch(`${UPSTREAM_API}/detail?bookId=${bookId}`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch data" },
-        { status: response.status }
-      );
+    const result = await getDrama(bookId);
+    const drama = result.data?.drama;
+    if (!drama) {
+      return encryptedResponse({ error: "Not found" }, 404);
     }
 
-    const data = await safeJson(response);
-    return encryptedResponse(data);
+    return encryptedResponse({
+      bookId: String(drama.id),
+      bookName: drama.title,
+      coverWap: drama.cover_url,
+      cover: drama.cover_url,
+      chapterCount: drama.chapter_count,
+      introduction: drama.introduction || "",
+      shelfTime: drama.shelf_time || "",
+      inLibrary: false,
+      tagNames: (result.data?.tags || []).map((t) => t.name),
+    });
   } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("dramabox/detail error:", error);
+    return encryptedResponse({ error: "Internal Server Error" }, 500);
   }
 }

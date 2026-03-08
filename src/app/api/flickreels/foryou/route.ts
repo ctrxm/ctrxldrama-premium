@@ -1,29 +1,23 @@
-import { encryptedResponse, safeJson } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { listDramas } from "@/lib/sdrama";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const page = searchParams.get("page") || "1";
-    
-    // Pass page param to upstream
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api"}/flickreels/foryou?page=${page}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: 'no-store'
-    });
-
-    if (!res.ok) {
-        return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
-    }
-
-    const data = await safeJson(res);
-    return encryptedResponse(data);
+    const page = parseInt(request.nextUrl.searchParams.get("page") || "1");
+    const result = await listDramas({ provider: "flickreels", page, per_page: 20 });
+    const list = (result.data || []).map((d) => ({
+      playlet_id: d.id,
+      title: d.title,
+      cover: d.cover_url,
+      upload_num: String(d.chapter_count),
+      introduce: d.introduction || "",
+    }));
+    return encryptedResponse({ status_code: 1, msg: "ok", data: { list } });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    console.error("flickreels/foryou error:", error);
+    return encryptedResponse({ status_code: 0, msg: "error", data: { list: [] } });
   }
 }

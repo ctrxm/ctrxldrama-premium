@@ -1,62 +1,58 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { getDrama, getEpisodes } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/netshort";
+export const dynamic = 'force-dynamic';
+
+function getBestUrl(ep: any): string {
+  if (ep.qualities) {
+    const sorted = Object.entries(ep.qualities as Record<string, string>)
+      .sort((a, b) => (parseInt(b[0]) || 0) - (parseInt(a[0]) || 0));
+    if (sorted.length > 0) return sorted[0][1];
+  }
+  return ep.video_url || "";
+}
 
 export async function GET(request: NextRequest) {
+  const shortPlayId = request.nextUrl.searchParams.get("shortPlayId");
+  if (!shortPlayId) return encryptedResponse({ success: false, error: "shortPlayId is required" }, 400);
+
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const shortPlayId = searchParams.get("shortPlayId");
+    const [detailRes, episodesRes] = await Promise.all([
+      getDrama(shortPlayId),
+      getEpisodes(shortPlayId, { per_page: 500 }),
+    ]);
 
-    if (!shortPlayId) {
-      return encryptedResponse(
-        { success: false, error: "shortPlayId is required" },
-        400
-      );
-    }
+    const drama = detailRes.data?.drama;
+    const rawEpisodes = episodesRes.data || [];
+    if (!drama) return encryptedResponse({ success: false, error: "Not found" });
 
-    const response = await fetch(`${UPSTREAM_API}/allepisode?shortPlayId=${shortPlayId}`, {
-      cache: 'no-store',});
-
-    if (!response.ok) {
-      return encryptedResponse(
-        { success: false, error: "Failed to fetch detail" }
-      );
-    }
-
-    const data = await safeJson<any>(response);
-
-    // Normalize episode data
-    const episodes = (data.shortPlayEpisodeInfos || []).map((ep: any) => ({
-      episodeId: ep.episodeId,
-      episodeNo: ep.episodeNo,
-      cover: ep.episodeCover,
-      videoUrl: ep.playVoucher,
-      quality: ep.playClarity || "720p",
-      isLock: ep.isLock,
-      likeNums: ep.likeNums,
-      subtitleUrl: ep.subtitleList?.[0]?.url || "",
+    const episodes = rawEpisodes.map((ep) => ({
+      episodeId: String(ep.id),
+      episodeNo: ep.episode_index + 1,
+      cover: "",
+      videoUrl: getBestUrl(ep),
+      quality: "720p",
+      isLock: false,
+      likeNums: "0",
+      subtitleUrl: ep.subtitle_url || ep.subtitles?.[0]?.url || "",
     }));
 
     return encryptedResponse({
       success: true,
-      shortPlayId: data.shortPlayId,
-      shortPlayLibraryId: data.shortPlayLibraryId,
-      title: data.shortPlayName,
-      cover: data.shortPlayCover,
-      description: data.shotIntroduce,
-      labels: data.shortPlayLabels || [],
-      totalEpisodes: data.totalEpisode,
-      isFinish: data.isFinish === 1,
-      payPoint: data.payPoint,
+      shortPlayId: String(drama.id),
+      shortPlayLibraryId: String(drama.external_id || drama.id),
+      title: drama.title,
+      cover: drama.cover_url,
+      description: drama.introduction || "",
+      labels: (detailRes.data?.tags || []).map((t) => t.name),
+      totalEpisodes: episodes.length,
+      isFinish: true,
+      payPoint: 0,
       episodes,
     });
   } catch (error) {
-    console.error("NetShort Detail Error:", error);
-    return encryptedResponse(
-      { success: false, error: "Internal server error" }
-    );
+    console.error("netshort/detail error:", error);
+    return encryptedResponse({ success: false, error: "Internal server error" });
   }
 }
-
-

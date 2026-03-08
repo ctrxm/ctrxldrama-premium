@@ -1,37 +1,19 @@
-import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { NextRequest, NextResponse } from "next/server";
+import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { searchDramas, dramaToLegacy } from "@/lib/sdrama";
 
-const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/dramabox";
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const query = searchParams.get("query");
-
-  if (!query) {
-    return encryptedResponse([]);
-  }
+  const query = request.nextUrl.searchParams.get("query");
+  if (!query) return encryptedResponse([]);
 
   try {
-    const response = await fetch(
-      `${UPSTREAM_API}/search?query=${encodeURIComponent(query)}`,
-      { cache: 'no-store',}
-    );
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch data" },
-        { status: response.status }
-      );
-    }
-
-    const data = await safeJson(response);
-    return encryptedResponse(data);
+    const result = await searchDramas({ q: query, provider: "dramabox" });
+    const dramas = (result.data || []).map(dramaToLegacy);
+    return encryptedResponse(dramas);
   } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("dramabox/search error:", error);
+    return encryptedResponse([]);
   }
 }
-

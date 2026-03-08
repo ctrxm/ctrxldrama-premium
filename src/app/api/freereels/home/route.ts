@@ -1,24 +1,22 @@
+import { encryptedResponse } from "@/lib/api-utils";
+import { popularDramas } from "@/lib/sdrama";
 
-import { encryptedResponse, safeJson } from "@/lib/api-utils";
-import { NextResponse } from "next/server";
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api"}/freereels/homepage`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 3600 }
-    });
-
-    if (!res.ok) {
-        return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
-    }
-
-    const data = await safeJson(res);
-    return encryptedResponse(data);
+    const result = await popularDramas({ provider: "freereels", per_page: 20 });
+    const items = (result.data || []).map((d) => ({
+      key: String(d.id),
+      cover: d.cover_url,
+      title: d.title,
+      desc: d.introduction || "",
+      episode_count: d.chapter_count,
+      follow_count: d.play_count || 0,
+    }));
+    return encryptedResponse({ code: 0, message: "ok", data: { items } });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    console.error("freereels/home error:", error);
+    return encryptedResponse({ code: 1, message: "error", data: { items: [] } });
   }
 }

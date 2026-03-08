@@ -9,7 +9,6 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
-import { SubscribeButton } from "@/components/SubscribeButton";
 import { RatingStars } from "@/components/RatingStars";
 import { CommentsSection } from "@/components/CommentsSection";
 import { ReviewsList } from "@/components/ReviewsList";
@@ -106,11 +105,6 @@ export default function ReelShortDetailPage() {
                   drama_cover={data.cover}
                 />
                 <ShareButton title={data.title} description={data.description?.slice(0, 100)} />
-                <SubscribeButton
-                  drama_id={data.bookId}
-                  platform="reelshort"
-                  drama_title={data.title}
-                />
               </div>
             </div>
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageCircle, Crown, Layers, User } from "lucide-react";
+import { Home, MessageCircle, Layers, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function BottomNav() {
@@ -31,12 +31,6 @@ export function BottomNav() {
       icon: Layers,
       label: "Library",
       active: pathname === "/favorites" || pathname === "/bookmarks",
-    },
-    {
-      href: "/upgrade",
-      icon: Crown,
-      label: "VIP",
-      active: pathname === "/upgrade",
     },
     {
       href: user ? "/profile" : "/login",

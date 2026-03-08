@@ -1,22 +1,25 @@
-
-import { type NextRequest } from "next/server";
 import { encryptedResponse } from "@/lib/api-utils";
+import { NextRequest } from "next/server";
+import { searchDramas } from "@/lib/sdrama";
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const query = searchParams.get("query");
-
-  if (!query) {
-    return encryptedResponse({ error: "Query parameter is required" }, 400);
-  }
+  const query = request.nextUrl.searchParams.get("query");
+  if (!query) return encryptedResponse({ code: 0, data: { search_data: [] } });
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api";
-    const response = await fetch(`${baseUrl}/melolo/search?query=${encodeURIComponent(query)}`);
-    const data = await response.json();
-    return encryptedResponse(data);
+    const result = await searchDramas({ q: query, provider: "melolo" });
+    const books = (result.data || []).map((d) => ({
+      book_id: String(d.id),
+      book_name: d.title,
+      thumb_url: d.cover_url,
+      abstract: d.introduction || "",
+      serial_count: d.chapter_count,
+    }));
+    return encryptedResponse({ code: 0, data: { search_data: [{ books }] } });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return encryptedResponse({ error: message }, 500);
+    console.error("melolo/search error:", error);
+    return encryptedResponse({ code: 1, data: { search_data: [] } });
   }
 }

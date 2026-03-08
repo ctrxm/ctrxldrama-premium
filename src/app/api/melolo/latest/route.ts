@@ -1,15 +1,21 @@
-
-import { type NextRequest } from "next/server";
 import { encryptedResponse } from "@/lib/api-utils";
+import { listDramas } from "@/lib/sdrama";
 
-export async function GET(request: NextRequest) {
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api";
-    const response = await fetch(`${baseUrl}/melolo/latest`);
-    const data = await response.json();
-    return encryptedResponse(data);
+    const result = await listDramas({ provider: "melolo", per_page: 20, sort_by: "created_at", sort_order: "desc" });
+    const books = (result.data || []).map((d) => ({
+      book_id: String(d.id),
+      book_name: d.title,
+      thumb_url: d.cover_url,
+      abstract: d.introduction || "",
+      serial_count: d.chapter_count,
+    }));
+    return encryptedResponse({ books, has_more: false, next_offset: 0, algo: 1 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return encryptedResponse({ error: message }, 500);
+    console.error("melolo/latest error:", error);
+    return encryptedResponse({ books: [], has_more: false, next_offset: 0 });
   }
 }
